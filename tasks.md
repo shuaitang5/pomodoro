@@ -10,8 +10,9 @@ Main flow:
 2. User clicks the tomato icon
 3. Dropdown shows timer controls
 4. User starts a focus countdown
-5. Focus completion alerts the user and starts break countdown
-6. Break completion alerts the user and returns to idle
+5. Focus completion alerts the user and waits for acknowledgement
+6. Break countdown starts after acknowledgement
+7. Break completion alerts the user and returns to idle
 
 ## Task Breakdown
 
@@ -37,7 +38,7 @@ Status: completed
 
 Implemented:
 
-- replace the standalone window with a menu bar dropdown panel
+- replace the standalone window with a custom status-item dropdown panel
 - show timer controls from the menu bar icon
 - keep a Dock icon fallback when the menu bar is crowded
 - open a compact control window when the Dock icon is clicked
@@ -60,9 +61,9 @@ Status: completed
 
 Implemented:
 
-- idle, focus, and break states
+- idle, focus, break pending acknowledgment, and break states
 - countdown updates every second
-- automatic transition from focus to break
+- delayed transition from focus to break until the popup is acknowledged
 - reset back to idle
 - timer text formatting for the UI
 
@@ -77,10 +78,9 @@ Status: completed
 
 Implemented:
 
-- macOS notifications
-- in-app alert support
+- popup window support
 - gentle sound
-- settings UI for focus/break presets and alert preferences
+- settings UI for focus/break presets and sound preferences
 - in-dropdown settings page behavior
 - keyboard shortcuts:
   - `Space`
@@ -114,9 +114,11 @@ The MVP is done when:
 - user can click the tomato icon to open the dropdown
 - user can start a focus session
 - timer counts down correctly
-- focus completion alerts the user and starts break
+- focus completion alerts the user and waits for acknowledgement
+- focus popup also shows the dropdown timer panel
+- break starts only after the popup is acknowledged
 - break completion alerts the user and returns to idle
 - settings slide in inside the dropdown
 - settings fit without scrolling
 - user can quit from the dropdown
-- presets and alert preferences work
+- presets and sound preference work

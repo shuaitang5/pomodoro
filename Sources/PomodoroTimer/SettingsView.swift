@@ -60,16 +60,14 @@ struct SettingsView: View {
                 Divider()
 
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("Alert options")
+                    Text("Alerts")
                         .font(.headline)
 
-                    Text("Use a gentle banner, popup, or sound when focus and break timers end.")
+                    Text("Popup windows always appear when focus and break timers end.")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }
 
-                Toggle("Show macOS notifications", isOn: $settings.notificationsEnabled)
-                Toggle("Show in-app popups", isOn: $settings.inAppAlertsEnabled)
                 Toggle("Play gentle sound", isOn: $settings.soundsEnabled)
             }
             .padding(18)

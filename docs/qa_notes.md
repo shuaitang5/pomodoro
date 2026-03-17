@@ -12,10 +12,10 @@ Final integration and QA pass for the macOS Pomodoro MVP.
 - Open settings from gear button and `Cmd+,`
 - Countdown updates in the UI
 - Focus completion triggers:
-  - break transition
-  - notification if enabled
-  - in-app alert if enabled
+  - in-app popup
+  - dropdown remaining visible while the popup is onscreen
   - gentle sound if enabled
+  - break waiting for user acknowledgement before countdown starts
 - Break completion triggers:
   - completion alert
   - idle reset
@@ -23,7 +23,7 @@ Final integration and QA pass for the macOS Pomodoro MVP.
 - Settings persist across launches for:
   - focus preset
   - break preset
-  - alert toggles
+  - sound toggle
 - Invalid saved duration values fall back to:
   - `25` focus
   - `5` break
@@ -40,7 +40,9 @@ Final integration and QA pass for the macOS Pomodoro MVP.
 
 ## Current Expected Behavior
 
-- Focus timer ends and automatically starts break timer
+- Focus timer ends, shows a popup, and waits for acknowledgement before break starts
+- While the popup is visible, the dropdown timer panel is also shown
+- After the popup is dismissed, the dropdown stays visible until the user clicks elsewhere or toggles the tomato icon
 - Break timer ends and the app returns to idle
 - If the user walks away, the app waits in idle for the next manual start
 - User-selected focus and break presets persist across launches
@@ -49,7 +51,7 @@ Final integration and QA pass for the macOS Pomodoro MVP.
 ## Verification Commands
 
 ```bash
-cd /Users/stang/Downloads/leetcode_grind
+cd /Users/tangshua/Downloads/pomodoro
 swift test
 ./scripts/package_app.sh
 ```

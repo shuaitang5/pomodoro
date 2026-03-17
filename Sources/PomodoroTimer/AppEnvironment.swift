@@ -6,7 +6,13 @@ final class AppEnvironment {
 
     let settings = AppSettingsStore()
     let panelState = MenuPanelState()
-    lazy var viewModel = PomodoroViewModel(settings: settings)
+    let alertPresenter = CompletionAlertPresenter()
+    let notificationManager = NotificationManager()
+    lazy var viewModel = PomodoroViewModel(
+        settings: settings,
+        notificationManager: notificationManager,
+        alertPresenter: alertPresenter
+    )
 
     private init() {}
 }

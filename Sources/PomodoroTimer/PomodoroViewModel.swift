@@ -1,33 +1,29 @@
 import Combine
 import Foundation
 
-struct PomodoroAlertContent: Identifiable, Equatable {
-    let id = UUID()
-    let title: String
-    let message: String
-}
-
 @MainActor
 final class PomodoroViewModel: ObservableObject {
     @Published private(set) var phase: PomodoroPhase
     @Published private(set) var remainingSeconds: Int
-    @Published var activeAlert: PomodoroAlertContent?
 
     private var engine: PomodoroEngine
     private var timer: Timer?
     private let now: () -> Date
     private let settings: AppSettingsStore
     private let notificationManager: NotificationHandling
+    private let alertPresenter: InAppAlertPresenting
     private var cancellables = Set<AnyCancellable>()
 
     init(
         settings: AppSettingsStore,
         notificationManager: NotificationHandling = NotificationManager(),
+        alertPresenter: InAppAlertPresenting = CompletionAlertPresenter(),
         engine: PomodoroEngine? = nil,
         now: @escaping () -> Date = Date.init
     ) {
         self.settings = settings
         self.notificationManager = notificationManager
+        self.alertPresenter = alertPresenter
         let configuredEngine = engine ?? PomodoroEngine(
             focusDuration: settings.focusDuration,
             breakDuration: settings.breakDuration
@@ -46,20 +42,10 @@ final class PomodoroViewModel: ObservableObject {
                 }
 
                 self.engine.updateDurations(
-                    focusDuration: TimeInterval(focusMinutes * 60),
-                    breakDuration: TimeInterval(breakMinutes * 60)
+                    focusDuration: AppSettingsStore.focusDuration(forMinutes: focusMinutes),
+                    breakDuration: AppSettingsStore.breakDuration(forMinutes: breakMinutes)
                 )
                 self.syncFromEngine()
-            }
-            .store(in: &cancellables)
-
-        settings.$notificationsEnabled
-            .sink { [weak self] isEnabled in
-                guard isEnabled else {
-                    return
-                }
-
-                self?.notificationManager.requestAuthorizationIfNeeded()
             }
             .store(in: &cancellables)
     }
@@ -76,6 +62,8 @@ final class PomodoroViewModel: ObservableObject {
             return "Ready to focus"
         case .focusRunning:
             return "Focus session in progress"
+        case .breakPending:
+            return "Break ready to start"
         case .breakRunning:
             return "Take a 5-minute break"
         }
@@ -107,13 +95,21 @@ final class PomodoroViewModel: ObservableObject {
         let transition = engine.tick(now: now())
         syncFromEngine()
 
-        handleTransition(transition)
+        guard let transition else {
+            return
+        }
 
-        if transition == .breakCompleted {
+        switch transition {
+        case .focusCompleted:
+            timer?.invalidate()
+            timer = nil
+            handleFocusCompleted()
+        case .breakCompleted:
             timer?.invalidate()
             timer = nil
             syncEngineDurationsToSettings()
             syncFromEngine()
+            handleBreakCompleted()
         }
     }
 
@@ -138,32 +134,39 @@ final class PomodoroViewModel: ObservableObject {
         )
     }
 
-    private func handleTransition(_ transition: PomodoroTransition?) {
-        guard let transition else {
-            return
-        }
-
-        switch transition {
-        case .focusCompleted:
-            let title = "Pomodoro complete"
-            let message = "Time for a \(settings.breakMinutes)-minute break."
-            deliverAlert(title: title, message: message)
-        case .breakCompleted:
-            let title = "Break complete"
-            let message = "Ready for the next focus session."
-            deliverAlert(title: title, message: message)
+    private func handleFocusCompleted() {
+        let title = "Pomodoro complete"
+        let message = "Time for a \(settings.breakMinutes)-minute break."
+        deliverAlert(title: title, message: message) { [weak self] in
+            self?.startBreakAfterAcknowledgement()
         }
     }
 
-    private func deliverAlert(title: String, message: String) {
-        if settings.notificationsEnabled {
-            notificationManager.deliverNotification(title: title, message: message, playSound: settings.soundsEnabled)
-        } else if settings.soundsEnabled {
+    private func handleBreakCompleted() {
+        let title = "Break complete"
+        let message = "Ready for the next focus session."
+        deliverAlert(title: title, message: message)
+    }
+
+    private func startBreakAfterAcknowledgement() {
+        guard phase == .breakPending else {
+            return
+        }
+
+        engine.startBreak(now: now())
+        syncFromEngine()
+        startTimer()
+    }
+
+    private func deliverAlert(
+        title: String,
+        message: String,
+        onDismiss: @escaping @MainActor () -> Void = {}
+    ) {
+        if settings.soundsEnabled {
             notificationManager.playGentleSound()
         }
 
-        if settings.inAppAlertsEnabled {
-            activeAlert = PomodoroAlertContent(title: title, message: message)
-        }
+        alertPresenter.presentAlert(title: title, message: message, onDismiss: onDismiss)
     }
 }

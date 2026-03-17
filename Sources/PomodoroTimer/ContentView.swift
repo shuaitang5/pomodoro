@@ -9,27 +9,20 @@ struct ContentView: View {
     var body: some View {
         cardContainer
             .padding(14)
-        .frame(width: 352, height: 476)
-        .background(
-            LinearGradient(
-                colors: [
-                    Color(red: 1.0, green: 0.97, blue: 0.93),
-                    Color(red: 0.99, green: 0.92, blue: 0.88)
-                ],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
+            .frame(width: 352, height: 476)
+            .background(
+                LinearGradient(
+                    colors: [
+                        Color(red: 1.0, green: 0.97, blue: 0.93),
+                        Color(red: 0.99, green: 0.92, blue: 0.88)
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
             )
-        )
-        .onDisappear {
-            panelState.showTimer()
-        }
-        .alert(item: $viewModel.activeAlert) { alert in
-            Alert(
-                title: Text(alert.title),
-                message: Text(alert.message),
-                dismissButton: .default(Text("OK"))
-            )
-        }
+            .onDisappear {
+                panelState.showTimer()
+            }
     }
 
     private var cardContainer: some View {
@@ -120,7 +113,7 @@ struct ContentView: View {
             }
             .buttonStyle(.borderless)
             .foregroundStyle(.secondary)
-                .keyboardShortcut("q", modifiers: [.command])
+            .keyboardShortcut("q", modifiers: [.command])
         }
         .padding(.horizontal, 24)
         .padding(.top, 18)

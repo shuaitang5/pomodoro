@@ -7,22 +7,14 @@ struct PomodoroTimerApp: App {
     private let environment = AppEnvironment.shared
 
     var body: some Scene {
-        MenuBarExtra {
-            ContentView(
-                settings: environment.settings,
-                panelState: environment.panelState,
-                viewModel: environment.viewModel
-            )
-        } label: {
-            Image(nsImage: MenuBarTomatoImage.icon)
-                .renderingMode(.template)
-                .accessibilityLabel("Pomodoro Timer")
+        Settings {
+            EmptyView()
         }
-        .menuBarExtraStyle(.window)
         .commands {
             CommandGroup(replacing: .appSettings) {
                 Button("Settings…") {
                     environment.panelState.showSettings()
+                    MenuBarController.shared.showPanel()
                 }
                 .keyboardShortcut(",", modifiers: .command)
             }
@@ -42,6 +34,7 @@ struct PomodoroTimerApp: App {
 final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.regular)
+        MenuBarController.shared.configure()
     }
 
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
@@ -53,7 +46,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 }
 
-private enum MenuBarTomatoImage {
+enum MenuBarTomatoImage {
     static let icon: NSImage = {
         let size = NSSize(width: 18, height: 18)
         let image = NSImage(size: size, flipped: false) { _ in

@@ -3,6 +3,7 @@ import Foundation
 enum PomodoroPhase: Equatable {
     case idle
     case focusRunning
+    case breakPending
     case breakRunning
 }
 
@@ -43,12 +44,24 @@ struct PomodoroEngine {
         endDate = nil
     }
 
+    mutating func startBreak(now: Date) {
+        guard phase == .breakPending else {
+            return
+        }
+
+        phase = .breakRunning
+        remainingSeconds = Int(breakDuration)
+        endDate = now.addingTimeInterval(breakDuration)
+    }
+
     mutating func updateDurations(focusDuration: TimeInterval, breakDuration: TimeInterval) {
         self.focusDuration = focusDuration
         self.breakDuration = breakDuration
 
         if phase == .idle {
             remainingSeconds = Int(focusDuration)
+        } else if phase == .breakPending {
+            remainingSeconds = Int(breakDuration)
         }
     }
 
@@ -68,10 +81,12 @@ struct PomodoroEngine {
         case .idle:
             return nil
         case .focusRunning:
-            phase = .breakRunning
+            phase = .breakPending
             remainingSeconds = Int(breakDuration)
-            self.endDate = now.addingTimeInterval(breakDuration)
+            self.endDate = nil
             return .focusCompleted
+        case .breakPending:
+            return nil
         case .breakRunning:
             reset()
             return .breakCompleted

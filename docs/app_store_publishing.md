@@ -180,7 +180,7 @@ Before this Pomodoro app is App Store ready, we should do these project tasks:
 
 - move from Swift package only to an Xcode macOS app target
 - confirm menu bar app behavior under App Sandbox
-- verify notifications work correctly in the sandboxed app
+- verify popup-window and sound behavior work correctly in the sandboxed app
 - set version/build numbers
 - prepare production screenshots
 - write support URL and privacy policy URL

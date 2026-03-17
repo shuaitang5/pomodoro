@@ -33,7 +33,7 @@ final class PomodoroEngineTests: XCTestCase {
         XCTAssertEqual(engine.remainingSeconds, 7)
     }
 
-    func testFocusCompletionStartsBreakTimer() {
+    func testFocusCompletionWaitsForBreakStartAcknowledgement() {
         var engine = PomodoroEngine(focusDuration: 10, breakDuration: 5)
         let start = Date(timeIntervalSince1970: 100)
         engine.start(now: start)
@@ -41,9 +41,22 @@ final class PomodoroEngineTests: XCTestCase {
         let transition = engine.tick(now: start.addingTimeInterval(10))
 
         XCTAssertEqual(transition, .focusCompleted)
+        XCTAssertEqual(engine.phase, .breakPending)
+        XCTAssertEqual(engine.remainingSeconds, 5)
+        XCTAssertNil(engine.endDate)
+    }
+
+    func testStartingBreakAfterAcknowledgementBeginsBreakCountdown() {
+        var engine = PomodoroEngine(focusDuration: 10, breakDuration: 5)
+        let start = Date(timeIntervalSince1970: 100)
+        engine.start(now: start)
+        _ = engine.tick(now: start.addingTimeInterval(10))
+
+        engine.startBreak(now: start.addingTimeInterval(14))
+
         XCTAssertEqual(engine.phase, .breakRunning)
         XCTAssertEqual(engine.remainingSeconds, 5)
-        XCTAssertEqual(engine.endDate, start.addingTimeInterval(15))
+        XCTAssertEqual(engine.endDate, start.addingTimeInterval(19))
     }
 
     func testBreakCompletionResetsBackToIdle() {
@@ -51,6 +64,7 @@ final class PomodoroEngineTests: XCTestCase {
         let start = Date(timeIntervalSince1970: 100)
         engine.start(now: start)
         _ = engine.tick(now: start.addingTimeInterval(10))
+        engine.startBreak(now: start.addingTimeInterval(10))
 
         let transition = engine.tick(now: start.addingTimeInterval(15))
 
@@ -91,6 +105,20 @@ final class PomodoroEngineTests: XCTestCase {
 
         XCTAssertEqual(engine.phase, .focusRunning)
         XCTAssertEqual(engine.remainingSeconds, 7)
+        XCTAssertEqual(engine.focusDuration, 20)
+        XCTAssertEqual(engine.breakDuration, 8)
+    }
+
+    func testUpdatingDurationsWhileBreakIsPendingRefreshesDisplayedBreakTime() {
+        var engine = PomodoroEngine(focusDuration: 10, breakDuration: 5)
+        let start = Date(timeIntervalSince1970: 100)
+        engine.start(now: start)
+        _ = engine.tick(now: start.addingTimeInterval(10))
+
+        engine.updateDurations(focusDuration: 20, breakDuration: 8)
+
+        XCTAssertEqual(engine.phase, .breakPending)
+        XCTAssertEqual(engine.remainingSeconds, 8)
         XCTAssertEqual(engine.focusDuration, 20)
         XCTAssertEqual(engine.breakDuration, 8)
     }

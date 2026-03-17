@@ -8,9 +8,9 @@ Native macOS Pomodoro timer built with SwiftUI as a menu bar app.
 - stays visible in the Dock as a fallback on crowded menu bars
 - opens a dropdown panel when the icon is clicked
 - opens a compact fallback control window when clicked from the Dock
-- runs a focus timer and then an automatic break timer
-- shows gentle alerts through notifications, popup alerts, and optional sound
-- includes an in-dropdown settings page for timer presets and alert preferences
+- runs a focus timer and waits for acknowledgment before starting the break timer
+- shows popup alerts with optional sound
+- includes an in-dropdown settings page for timer presets and sound preferences
 - packages as a double-clickable `.app`
 
 ## High-Level Architecture
@@ -18,10 +18,14 @@ Native macOS Pomodoro timer built with SwiftUI as a menu bar app.
 ### App Shell
 
 - `Sources/PomodoroTimer/PomodoroTimerApp.swift`
-- Defines the menu bar app using `MenuBarExtra`
+- Boots the app shell and menu commands
 - Adds the `Cmd+,` shortcut for settings
 - Holds shared dropdown page state
 - Reopens a fallback control window from Dock clicks
+
+- `Sources/PomodoroTimer/MenuBarController.swift`
+- Owns the status bar item and the custom dropdown panel
+- Handles programmatic panel show/hide behavior for alerts and icon clicks
 
 - `Sources/PomodoroTimer/AppEnvironment.swift`
 - Holds the shared settings, page state, and timer view model used by both surfaces
@@ -45,6 +49,7 @@ Native macOS Pomodoro timer built with SwiftUI as a menu bar app.
 - Pure timer state machine for:
   - idle
   - focus running
+  - break pending acknowledgment
   - break running
 - Handles countdown transitions and reset behavior
 
@@ -54,29 +59,32 @@ Native macOS Pomodoro timer built with SwiftUI as a menu bar app.
 - Connects the timer engine to SwiftUI
 - Formats timer text for the UI
 - Runs the repeating timer
-- Triggers notifications and popup alerts on transitions
+- Triggers popup alerts on transitions
+- Starts the break countdown only after the focus-complete popup is acknowledged
 - Makes sure reset and post-break idle return to the current selected focus preset
 
 ### Settings
 
 - `Sources/PomodoroTimer/AppSettingsStore.swift`
 - Stores saved user preferences in `UserDefaults`
-- Handles saved focus and break presets plus alert toggles
+- Handles saved focus and break presets plus the sound toggle
 
 - `Sources/PomodoroTimer/SettingsView.swift`
-- Settings page UI for choosing presets and alert behavior
+- Settings page UI for choosing presets and sound behavior
 
 ### Notifications
 
 - `Sources/PomodoroTimer/NotificationManager.swift`
-- Wraps macOS notifications and the gentle completion sound
+- Plays the gentle completion sound
 
 ## Presets And Behavior
 
-- Focus presets: `15, 20, 25, 30, 35, 40, 45, 50`
+- Focus presets: `5, 15, 20, 25, 30, 35, 40, 45, 50`
 - Break presets: `5, 10, 15`
-- Default values: `25` focus, `5` break
+- Default values: `25` minute focus, `5` minute break
 - User-selected presets persist across launches
+- Focus completion shows the popup and keeps the dropdown visible until the user clicks elsewhere or toggles the tomato icon
+- Break countdown starts only after the focus-complete popup is acknowledged
 - After a full focus+break cycle, the app returns to idle using the currently selected focus preset
 
 ## Shortcuts
@@ -90,14 +98,14 @@ Native macOS Pomodoro timer built with SwiftUI as a menu bar app.
 Run the app:
 
 ```bash
-cd /Users/stang/Downloads/leetcode_grind
+cd /Users/tangshua/Downloads/pomodoro
 swift run
 ```
 
 Run tests:
 
 ```bash
-cd /Users/stang/Downloads/leetcode_grind
+cd /Users/tangshua/Downloads/pomodoro
 swift test
 ```
 
@@ -106,7 +114,7 @@ swift test
 Build a fresh app bundle:
 
 ```bash
-cd /Users/stang/Downloads/leetcode_grind
+cd /Users/tangshua/Downloads/pomodoro
 ./scripts/package_app.sh
 ```
 

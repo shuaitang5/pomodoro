@@ -3,7 +3,7 @@ import Foundation
 
 @MainActor
 final class AppSettingsStore: ObservableObject {
-    static let allowedFocusMinutes = [15, 20, 25, 30, 35, 40, 45, 50]
+    static let allowedFocusMinutes = [5, 15, 20, 25, 30, 35, 40, 45, 50]
     static let allowedBreakMinutes = [5, 10, 15]
     static let defaultFocusMinutes = 25
     static let defaultBreakMinutes = 5
@@ -30,18 +30,6 @@ final class AppSettingsStore: ObservableObject {
         }
     }
 
-    @Published var notificationsEnabled: Bool {
-        didSet {
-            userDefaults.set(notificationsEnabled, forKey: Self.notificationsEnabledKey)
-        }
-    }
-
-    @Published var inAppAlertsEnabled: Bool {
-        didSet {
-            userDefaults.set(inAppAlertsEnabled, forKey: Self.inAppAlertsEnabledKey)
-        }
-    }
-
     @Published var soundsEnabled: Bool {
         didSet {
             userDefaults.set(soundsEnabled, forKey: Self.soundsEnabledKey)
@@ -49,19 +37,17 @@ final class AppSettingsStore: ObservableObject {
     }
 
     var focusDuration: TimeInterval {
-        TimeInterval(focusMinutes * 60)
+        Self.focusDuration(forMinutes: focusMinutes)
     }
 
     var breakDuration: TimeInterval {
-        TimeInterval(breakMinutes * 60)
+        Self.breakDuration(forMinutes: breakMinutes)
     }
 
     private let userDefaults: UserDefaults
 
     private static let focusMinutesKey = "focusMinutes"
     private static let breakMinutesKey = "breakMinutes"
-    private static let notificationsEnabledKey = "notificationsEnabled"
-    private static let inAppAlertsEnabledKey = "inAppAlertsEnabled"
     private static let soundsEnabledKey = "soundsEnabled"
 
     init(userDefaults: UserDefaults = .standard) {
@@ -75,8 +61,6 @@ final class AppSettingsStore: ObservableObject {
         self.breakMinutes = Self.allowedBreakMinutes.contains(persistedBreakMinutes ?? Self.defaultBreakMinutes)
             ? (persistedBreakMinutes ?? Self.defaultBreakMinutes)
             : Self.defaultBreakMinutes
-        self.notificationsEnabled = userDefaults.object(forKey: Self.notificationsEnabledKey) as? Bool ?? true
-        self.inAppAlertsEnabled = userDefaults.object(forKey: Self.inAppAlertsEnabledKey) as? Bool ?? true
         self.soundsEnabled = userDefaults.object(forKey: Self.soundsEnabledKey) as? Bool ?? true
     }
 
@@ -86,6 +70,14 @@ final class AppSettingsStore: ObservableObject {
 
     static func normalizeBreakMinutes(_ value: Int) -> Int {
         nearestAllowedValue(to: value, allowedValues: allowedBreakMinutes) ?? defaultBreakMinutes
+    }
+
+    static func focusDuration(forMinutes value: Int) -> TimeInterval {
+        TimeInterval(value * 60)
+    }
+
+    static func breakDuration(forMinutes value: Int) -> TimeInterval {
+        TimeInterval(value * 60)
     }
 
     private static func nearestAllowedValue(to value: Int, allowedValues: [Int]) -> Int? {
