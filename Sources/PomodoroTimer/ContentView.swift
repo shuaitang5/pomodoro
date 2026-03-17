@@ -7,7 +7,7 @@ struct ContentView: View {
         case fullWindow
     }
 
-    static let panelWidth: CGFloat = 336
+    static let panelWidth: CGFloat = 300
     static let panelHeight: CGFloat = 460
 
     @ObservedObject var settings: AppSettingsStore
@@ -98,7 +98,7 @@ struct ContentView: View {
                 .multilineTextAlignment(.center)
                 .lineLimit(2)
                 .fixedSize(horizontal: false, vertical: true)
-                .frame(maxWidth: 280)
+                .frame(maxWidth: 260)
 
             Button("Quit") {
                 NSApp.terminate(nil)

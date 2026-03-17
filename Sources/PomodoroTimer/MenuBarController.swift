@@ -7,7 +7,6 @@ final class MenuBarController: NSObject, NSWindowDelegate {
 
     private let panelScreenInset: CGFloat = 8
     private let panelVerticalSpacing: CGFloat = 6
-    private let panelHorizontalOffset: CGFloat = 12
     private let statusItemWindowRetryLimit = 20
     private let statusItemWindowRetryDelay: TimeInterval = 0.01
     private let panelStabilizationPassCount = 3
@@ -240,8 +239,12 @@ final class MenuBarController: NSObject, NSWindowDelegate {
     private func panelOrigin(for anchorRect: NSRect, on screen: NSScreen?, panel: NSPanel) -> NSPoint {
         let fallbackVisibleFrame = NSScreen.main?.visibleFrame ?? .zero
         let visibleFrame = screen?.visibleFrame ?? fallbackVisibleFrame
+        let leftAlignedX = anchorRect.minX
+        let rightAlignedX = anchorRect.maxX - panel.frame.width
+        let rightEdgeLimit = visibleFrame.maxX - panel.frame.width - panelScreenInset
+        let shouldRightAlign = leftAlignedX > rightEdgeLimit
         var origin = NSPoint(
-            x: anchorRect.midX - (panel.frame.width / 2) + panelHorizontalOffset,
+            x: shouldRightAlign ? rightAlignedX : leftAlignedX,
             y: anchorRect.minY - panel.frame.height - panelVerticalSpacing
         )
 

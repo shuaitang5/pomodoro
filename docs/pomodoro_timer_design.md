@@ -34,6 +34,7 @@ The dropdown panel shows:
 
 - a main timer page with countdown, status, `Start`, `Reset`, `Settings`, and `Quit`
 - a settings page with focus, break, and sound controls
+- the panel aligns to the left edge of the menu bar icon by default and flips to right-edge alignment when the icon is near the screen edge
 
 When the user clicks `Settings`:
 
