@@ -37,6 +37,7 @@ Final integration and QA pass for the macOS Pomodoro MVP.
 - Added keyboard shortcuts for `Start` and `Reset`
 - Fixed idle timer after full cycle so it returns to the current selected focus preset
 - Switched bundle ID to `com.pomodorotimer.app`
+- Added ticket-style issue log in `docs/issue_log.md` for notable resolved UI bugs
 
 ## Current Expected Behavior
 

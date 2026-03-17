@@ -5,6 +5,14 @@ import SwiftUI
 final class MenuBarController: NSObject, NSWindowDelegate {
     static let shared = MenuBarController()
 
+    private let panelScreenInset: CGFloat = 8
+    private let panelVerticalSpacing: CGFloat = 6
+    private let panelHorizontalOffset: CGFloat = 12
+    private let statusItemWindowRetryLimit = 20
+    private let statusItemWindowRetryDelay: TimeInterval = 0.01
+    private let panelStabilizationPassCount = 3
+    private let panelStabilizationDelay: TimeInterval = 0.02
+
     private var statusItem: NSStatusItem?
     private var panel: MenuBarPanel?
     private var localClickMonitor: Any?
@@ -24,7 +32,19 @@ final class MenuBarController: NSObject, NSWindowDelegate {
     }
 
     func showPanel() {
+        showPanel(statusItemWindowRetriesRemaining: statusItemWindowRetryLimit)
+    }
+
+    private func showPanel(statusItemWindowRetriesRemaining: Int) {
         configure()
+
+        if statusItem?.button?.window == nil,
+           statusItemWindowRetriesRemaining > 0 {
+            DispatchQueue.main.asyncAfter(deadline: .now() + statusItemWindowRetryDelay) { [weak self] in
+                self?.showPanel(statusItemWindowRetriesRemaining: statusItemWindowRetriesRemaining - 1)
+            }
+            return
+        }
 
         let panel = makePanelIfNeeded()
         refreshPanelContent()
@@ -33,6 +53,7 @@ final class MenuBarController: NSObject, NSWindowDelegate {
 
         NSApp.activate(ignoringOtherApps: true)
         panel.makeKeyAndOrderFront(nil)
+        stabilizePanelPosition(panel, passesRemaining: panelStabilizationPassCount)
     }
 
     func hidePanel() {
@@ -68,7 +89,12 @@ final class MenuBarController: NSObject, NSWindowDelegate {
 
         let hostingController = NSHostingController(rootView: makeContentView())
         let panel = MenuBarPanel(
-            contentRect: NSRect(x: 0, y: 0, width: 352, height: 476),
+            contentRect: NSRect(
+                x: 0,
+                y: 0,
+                width: ContentView.panelWidth,
+                height: ContentView.panelHeight
+            ),
             styleMask: [.borderless, .nonactivatingPanel],
             backing: .buffered,
             defer: false
@@ -76,7 +102,7 @@ final class MenuBarController: NSObject, NSWindowDelegate {
         panel.contentViewController = hostingController
         panel.backgroundColor = .clear
         panel.isOpaque = false
-        panel.hasShadow = true
+        panel.hasShadow = false
         panel.hidesOnDeactivate = false
         panel.isMovable = false
         panel.level = .floating
@@ -105,34 +131,16 @@ final class MenuBarController: NSObject, NSWindowDelegate {
     }
 
     private func positionPanel(_ panel: NSPanel) {
-        guard let button = statusItem?.button,
-              let buttonWindow = button.window else {
-            panel.center()
+        guard let buttonFrameOnScreen = statusButtonFrameOnScreen() else {
+            positionPanelUsingMouseLocation(panel)
             return
         }
 
-        let buttonFrame = button.convert(button.bounds, to: nil)
-        let buttonFrameOnScreen = buttonWindow.convertToScreen(buttonFrame)
-        guard let screen = buttonWindow.screen ?? NSScreen.main else {
-            panel.setFrameOrigin(
-                NSPoint(
-                    x: buttonFrameOnScreen.midX - (panel.frame.width / 2),
-                    y: buttonFrameOnScreen.minY - panel.frame.height - 8
-                )
-            )
-            return
-        }
+        let screen = statusItem?.button?.window?.screen
+            ?? NSScreen.screens.first(where: { $0.frame.intersects(buttonFrameOnScreen) })
+            ?? NSScreen.main
 
-        let visibleFrame = screen.visibleFrame
-        var origin = NSPoint(
-            x: buttonFrameOnScreen.midX - (panel.frame.width / 2),
-            y: buttonFrameOnScreen.minY - panel.frame.height - 8
-        )
-
-        origin.x = min(max(origin.x, visibleFrame.minX + 8), visibleFrame.maxX - panel.frame.width - 8)
-        origin.y = max(origin.y, visibleFrame.minY + 8)
-
-        panel.setFrameOrigin(origin)
+        panel.setFrameOrigin(panelOrigin(for: buttonFrameOnScreen, on: screen, panel: panel))
     }
 
     private func installClickMonitorsIfNeeded() {
@@ -195,14 +203,7 @@ final class MenuBarController: NSObject, NSWindowDelegate {
     }
 
     private func isPointInsideStatusButton(_ point: NSPoint) -> Bool {
-        guard let button = statusItem?.button,
-              let buttonWindow = button.window else {
-            return false
-        }
-
-        let buttonFrame = button.convert(button.bounds, to: nil)
-        let buttonFrameOnScreen = buttonWindow.convertToScreen(buttonFrame)
-        return buttonFrameOnScreen.contains(point)
+        statusButtonFrameOnScreen()?.contains(point) == true
     }
 
     private func screenPoint(for event: NSEvent) -> NSPoint {
@@ -212,6 +213,55 @@ final class MenuBarController: NSObject, NSWindowDelegate {
 
         let rect = NSRect(origin: event.locationInWindow, size: .zero)
         return window.convertToScreen(rect).origin
+    }
+
+    private func positionPanelUsingMouseLocation(_ panel: NSPanel) {
+        let mouseLocation = NSEvent.mouseLocation
+        let anchorRect = NSRect(origin: mouseLocation, size: .zero)
+        let screen = NSScreen.screens.first(where: { $0.frame.contains(mouseLocation) }) ?? NSScreen.main
+        panel.setFrameOrigin(panelOrigin(for: anchorRect, on: screen, panel: panel))
+    }
+
+    private func stabilizePanelPosition(_ panel: NSPanel, passesRemaining: Int) {
+        guard passesRemaining > 0 else {
+            return
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + panelStabilizationDelay) { [weak self, weak panel] in
+            guard let self, let panel, panel.isVisible else {
+                return
+            }
+
+            self.positionPanel(panel)
+            self.stabilizePanelPosition(panel, passesRemaining: passesRemaining - 1)
+        }
+    }
+
+    private func panelOrigin(for anchorRect: NSRect, on screen: NSScreen?, panel: NSPanel) -> NSPoint {
+        let fallbackVisibleFrame = NSScreen.main?.visibleFrame ?? .zero
+        let visibleFrame = screen?.visibleFrame ?? fallbackVisibleFrame
+        var origin = NSPoint(
+            x: anchorRect.midX - (panel.frame.width / 2) + panelHorizontalOffset,
+            y: anchorRect.minY - panel.frame.height - panelVerticalSpacing
+        )
+
+        origin.x = min(
+            max(origin.x, visibleFrame.minX + panelScreenInset),
+            visibleFrame.maxX - panel.frame.width - panelScreenInset
+        )
+        origin.y = max(origin.y, visibleFrame.minY + panelScreenInset)
+
+        return origin
+    }
+
+    private func statusButtonFrameOnScreen() -> NSRect? {
+        guard let buttonWindow = statusItem?.button?.window,
+              buttonWindow.frame.width > 0,
+              buttonWindow.frame.height > 0 else {
+            return nil
+        }
+
+        return buttonWindow.frame
     }
 }
 

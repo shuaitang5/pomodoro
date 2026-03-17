@@ -40,6 +40,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
         if !flag {
             ControlWindowController.shared.show()
+            return false
         }
 
         return true

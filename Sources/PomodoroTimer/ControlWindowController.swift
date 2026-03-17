@@ -15,13 +15,14 @@ final class ControlWindowController: NSObject, NSWindowDelegate {
             hostingController.rootView = ContentView(
                 settings: environment.settings,
                 panelState: environment.panelState,
-                viewModel: environment.viewModel
+                viewModel: environment.viewModel,
+                surfaceStyle: .fullWindow
             )
         }
 
         AppEnvironment.shared.panelState.showTimer()
-        window.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
+        window.makeKeyAndOrderFront(nil)
     }
 
     func windowWillClose(_ notification: Notification) {
@@ -41,17 +42,21 @@ final class ControlWindowController: NSObject, NSWindowDelegate {
         let contentView = ContentView(
             settings: environment.settings,
             panelState: environment.panelState,
-            viewModel: environment.viewModel
+            viewModel: environment.viewModel,
+            surfaceStyle: .fullWindow
         )
 
         let hostingController = NSHostingController(rootView: contentView)
         let window = NSWindow(contentViewController: hostingController)
         window.title = "Pomodoro Timer"
         window.styleMask = [.titled, .closable, .miniaturizable]
-        window.titleVisibility = .hidden
-        window.titlebarAppearsTransparent = true
+        window.titleVisibility = .visible
+        window.titlebarAppearsTransparent = false
         window.isReleasedWhenClosed = false
-        window.setContentSize(NSSize(width: 352, height: 476))
+        window.isOpaque = true
+        window.backgroundColor = .windowBackgroundColor
+        window.hasShadow = true
+        window.setContentSize(NSSize(width: ContentView.panelWidth, height: ContentView.panelHeight))
         window.center()
         window.delegate = self
 
