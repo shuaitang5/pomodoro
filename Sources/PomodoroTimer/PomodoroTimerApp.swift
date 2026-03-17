@@ -3,12 +3,16 @@ import AppKit
 
 @main
 struct PomodoroTimerApp: App {
-    @StateObject private var settings = AppSettingsStore()
-    @StateObject private var panelState = MenuPanelState()
+    @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
+    private let environment = AppEnvironment.shared
 
     var body: some Scene {
         MenuBarExtra {
-            ContentView(settings: settings, panelState: panelState)
+            ContentView(
+                settings: environment.settings,
+                panelState: environment.panelState,
+                viewModel: environment.viewModel
+            )
         } label: {
             Image(nsImage: MenuBarTomatoImage.icon)
                 .renderingMode(.template)
@@ -18,7 +22,7 @@ struct PomodoroTimerApp: App {
         .commands {
             CommandGroup(replacing: .appSettings) {
                 Button("Settings…") {
-                    panelState.showSettings()
+                    environment.panelState.showSettings()
                 }
                 .keyboardShortcut(",", modifiers: .command)
             }
@@ -32,6 +36,20 @@ struct PomodoroTimerApp: App {
                 .keyboardShortcut("q", modifiers: .command)
             }
         }
+    }
+}
+
+final class AppDelegate: NSObject, NSApplicationDelegate {
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        NSApp.setActivationPolicy(.regular)
+    }
+
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        if !flag {
+            ControlWindowController.shared.show()
+        }
+
+        return true
     }
 }
 

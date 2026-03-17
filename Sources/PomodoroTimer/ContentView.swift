@@ -4,13 +4,7 @@ import SwiftUI
 struct ContentView: View {
     @ObservedObject var settings: AppSettingsStore
     @ObservedObject var panelState: MenuPanelState
-    @StateObject private var viewModel: PomodoroViewModel
-
-    init(settings: AppSettingsStore, panelState: MenuPanelState) {
-        self.settings = settings
-        self.panelState = panelState
-        _viewModel = StateObject(wrappedValue: PomodoroViewModel(settings: settings))
-    }
+    @ObservedObject var viewModel: PomodoroViewModel
 
     var body: some View {
         cardContainer

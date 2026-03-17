@@ -39,6 +39,8 @@ Implemented:
 
 - replace the standalone window with a menu bar dropdown panel
 - show timer controls from the menu bar icon
+- keep a Dock icon fallback when the menu bar is crowded
+- open a compact control window when the Dock icon is clicked
 - keep settings inside the dropdown as a second page
 - add a quit action inside the dropdown
 - animate from the timer page into the settings page
@@ -48,6 +50,7 @@ Key files:
 
 - `Sources/PomodoroTimer/PomodoroTimerApp.swift`
 - `Sources/PomodoroTimer/ContentView.swift`
+- `Sources/PomodoroTimer/ControlWindowController.swift`
 - `Sources/PomodoroTimer/MenuPanelState.swift`
 - `Sources/PomodoroTimer/SettingsView.swift`
 
@@ -106,6 +109,8 @@ Planned:
 The MVP is done when:
 
 - app launches into the menu bar
+- app is still reachable from the Dock
+- clicking the Dock icon opens a usable control window
 - user can click the tomato icon to open the dropdown
 - user can start a focus session
 - timer counts down correctly

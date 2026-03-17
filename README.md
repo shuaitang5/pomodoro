@@ -5,7 +5,9 @@ Native macOS Pomodoro timer built with SwiftUI as a menu bar app.
 ## What It Does
 
 - launches as a tomato icon in the macOS menu bar
+- stays visible in the Dock as a fallback on crowded menu bars
 - opens a dropdown panel when the icon is clicked
+- opens a compact fallback control window when clicked from the Dock
 - runs a focus timer and then an automatic break timer
 - shows gentle alerts through notifications, popup alerts, and optional sound
 - includes an in-dropdown settings page for timer presets and alert preferences
@@ -19,6 +21,13 @@ Native macOS Pomodoro timer built with SwiftUI as a menu bar app.
 - Defines the menu bar app using `MenuBarExtra`
 - Adds the `Cmd+,` shortcut for settings
 - Holds shared dropdown page state
+- Reopens a fallback control window from Dock clicks
+
+- `Sources/PomodoroTimer/AppEnvironment.swift`
+- Holds the shared settings, page state, and timer view model used by both surfaces
+
+- `Sources/PomodoroTimer/ControlWindowController.swift`
+- Owns the compact fallback window that opens from Dock clicks
 
 ### Menu Bar Panel
 
@@ -108,7 +117,7 @@ Output:
 Notes:
 
 - Bundle identifier: `com.pomodorotimer.app`
-- The packaged app is configured as a menu bar app
+- The packaged app uses the menu bar as the main UI and keeps a Dock fallback
 - The packaging script builds a universal macOS app with both `arm64` and `x86_64` slices
 - The packaging script clears saved preferences on the machine running the script before creating a fresh app bundle
 
