@@ -239,22 +239,14 @@ final class MenuBarController: NSObject, NSWindowDelegate {
     private func panelOrigin(for anchorRect: NSRect, on screen: NSScreen?, panel: NSPanel) -> NSPoint {
         let fallbackVisibleFrame = NSScreen.main?.visibleFrame ?? .zero
         let visibleFrame = screen?.visibleFrame ?? fallbackVisibleFrame
-        let leftAlignedX = anchorRect.minX
-        let rightAlignedX = anchorRect.maxX - panel.frame.width
-        let rightEdgeLimit = visibleFrame.maxX - panel.frame.width - panelScreenInset
-        let shouldRightAlign = leftAlignedX > rightEdgeLimit
-        var origin = NSPoint(
-            x: shouldRightAlign ? rightAlignedX : leftAlignedX,
-            y: anchorRect.minY - panel.frame.height - panelVerticalSpacing
+        let origin = MenuBarPanelPositioning.panelOrigin(
+            anchorRect: anchorRect,
+            visibleFrame: visibleFrame,
+            panelSize: panel.frame.size,
+            screenInset: panelScreenInset,
+            verticalSpacing: panelVerticalSpacing
         )
-
-        origin.x = min(
-            max(origin.x, visibleFrame.minX + panelScreenInset),
-            visibleFrame.maxX - panel.frame.width - panelScreenInset
-        )
-        origin.y = max(origin.y, visibleFrame.minY + panelScreenInset)
-
-        return origin
+        return NSPoint(x: origin.x, y: origin.y)
     }
 
     private func statusButtonFrameOnScreen() -> NSRect? {
