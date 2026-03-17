@@ -13,7 +13,8 @@ PLIST_TEMPLATE="$ROOT_DIR/packaging/$APP_NAME-Info.plist"
 ICON_SCRIPT="$ROOT_DIR/scripts/generate_app_icon.swift"
 ARM64_BUILD_DIR="$ROOT_DIR/.build-arm64"
 X86_BUILD_DIR="$ROOT_DIR/.build-x86_64"
-UNIVERSAL_BINARY="$ROOT_DIR/.build/$APP_NAME-universal"
+UNIVERSAL_BUILD_DIR="$ROOT_DIR/.build-universal"
+UNIVERSAL_BINARY="$UNIVERSAL_BUILD_DIR/$APP_NAME"
 MACOS_DEPLOYMENT_TARGET="14.0"
 
 # Clear this Mac's saved preferences so the packaged app starts fresh.
@@ -32,7 +33,9 @@ fi
 
 rm -rf "$APP_DIR"
 rm -rf "$ICONSET_DIR"
+rm -rf "$UNIVERSAL_BUILD_DIR"
 mkdir -p "$MACOS_DIR" "$RESOURCES_DIR"
+mkdir -p "$UNIVERSAL_BUILD_DIR"
 
 lipo -create -output "$UNIVERSAL_BINARY" "$ARM64_BINARY" "$X86_BINARY"
 
