@@ -1,0 +1,83 @@
+import SwiftUI
+import AppKit
+
+@main
+struct PomodoroTimerApp: App {
+    @StateObject private var settings = AppSettingsStore()
+    @StateObject private var panelState = MenuPanelState()
+
+    var body: some Scene {
+        MenuBarExtra {
+            ContentView(settings: settings, panelState: panelState)
+        } label: {
+            Image(nsImage: MenuBarTomatoImage.icon)
+                .renderingMode(.template)
+                .accessibilityLabel("Pomodoro Timer")
+        }
+        .menuBarExtraStyle(.window)
+        .commands {
+            CommandGroup(replacing: .appSettings) {
+                Button("Settings…") {
+                    panelState.showSettings()
+                }
+                .keyboardShortcut(",", modifiers: .command)
+            }
+
+            CommandGroup(after: .appSettings) {
+                Divider()
+
+                Button("Quit PomodoroTimer") {
+                    NSApp.terminate(nil)
+                }
+                .keyboardShortcut("q", modifiers: .command)
+            }
+        }
+    }
+}
+
+private enum MenuBarTomatoImage {
+    static let icon: NSImage = {
+        let size = NSSize(width: 18, height: 18)
+        let image = NSImage(size: size, flipped: false) { _ in
+            NSColor.labelColor.setFill()
+
+            NSBezierPath(ovalIn: NSRect(x: 2.2, y: 1.8, width: 13.6, height: 11.8)).fill()
+
+            let sepal = NSBezierPath()
+            let center = CGPoint(x: 9.0, y: 12.0)
+            let outerRadius: CGFloat = 4.5
+            let innerRadius: CGFloat = 2.0
+
+            for index in 0..<10 {
+                let angle = (CGFloat(index) * (.pi / 5.0)) - (.pi / 2.0)
+                let radius = index.isMultiple(of: 2) ? outerRadius : innerRadius
+                let point = CGPoint(
+                    x: center.x + cos(angle) * radius,
+                    y: center.y + sin(angle) * radius
+                )
+
+                if index == 0 {
+                    sepal.move(to: point)
+                } else {
+                    sepal.line(to: point)
+                }
+            }
+
+            sepal.close()
+            sepal.fill()
+
+            let stem = NSBezierPath(roundedRect: NSRect(x: 8.1, y: 11.2, width: 1.9, height: 5.2), xRadius: 0.95, yRadius: 0.95)
+            var transform = AffineTransform()
+            transform.translate(x: 8.8, y: 11.7)
+            transform.rotate(byDegrees: 24)
+            transform.translate(x: -8.8, y: -11.7)
+            stem.transform(using: transform)
+            stem.fill()
+
+            return true
+        }
+
+        image.isTemplate = true
+        return image
+    }()
+}
