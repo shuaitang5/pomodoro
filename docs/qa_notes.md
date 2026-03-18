@@ -6,7 +6,9 @@ Final integration and QA pass for the macOS Pomodoro MVP.
 
 ## End-To-End Checks
 
-- Launch app window successfully
+- Launch app successfully with only the menu bar item visible
+- Launch the app again and confirm the fallback control window opens in front
+- Close the fallback control window and confirm the Dock icon disappears again
 - Start focus session from button and with `Space`
 - Reset from button and with `R`
 - Open settings from gear button and `Cmd+,`

@@ -16,13 +16,14 @@ Core flow:
 
 ## Chosen Product Shape
 
-- Menu bar app with a Dock fallback
+- Menu bar app with a temporary Dock fallback
 - No normal main app window on launch
 - Tomato icon in the macOS menu bar
-- Standard Dock icon is also visible so the app is still reachable on crowded menu bars
+- No Dock icon on normal launch
 - Countdown timer shown inside the dropdown panel when the icon is clicked
 - Settings live inside the same dropdown panel as a second page
-- Clicking the Dock icon opens a compact fallback control window
+- Launching the app again opens a compact fallback control window when the menu bar icon is not accessible
+- The Dock icon is visible only while the fallback control window is open
 
 ## Menu Bar Behavior
 
@@ -87,13 +88,13 @@ The settings page lets the user control:
 ## Technical Design
 
 - `NSStatusItem` plus a custom `NSPanel` for the menu bar entry point
-- `NSWindow` fallback for Dock clicks
+- `NSWindow` fallback for relaunches when the menu bar item is not accessible
 - `SwiftUI` for the dropdown content, popup content, and in-panel settings page
 - `PomodoroEngine` for timer state and transitions
 - `PomodoroViewModel` for UI-facing behavior
 - `NotificationManager` for gentle sound delivery
 - `AppSettingsStore` for saved user preferences
-- shared app state so the menu bar and Dock fallback stay in sync
+- shared app state so the menu bar and temporary Dock fallback stay in sync
 
 ## Packaging
 

@@ -21,6 +21,7 @@ final class ControlWindowController: NSObject, NSWindowDelegate {
         }
 
         AppEnvironment.shared.panelState.showTimer()
+        NSApp.setActivationPolicy(.regular)
         NSApp.activate(ignoringOtherApps: true)
         window.makeKeyAndOrderFront(nil)
     }
@@ -31,6 +32,7 @@ final class ControlWindowController: NSObject, NSWindowDelegate {
         }
 
         closingWindow.orderOut(nil)
+        NSApp.setActivationPolicy(.accessory)
     }
 
     private func makeWindowIfNeeded() -> NSWindow {

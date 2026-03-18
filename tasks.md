@@ -40,8 +40,9 @@ Implemented:
 
 - replace the standalone window with a custom status-item dropdown panel
 - show timer controls from the menu bar icon
-- keep a Dock icon fallback when the menu bar is crowded
-- open a compact control window when the Dock icon is clicked
+- stay out of the Dock on normal launch
+- open a compact fallback control window when the app is launched again and the menu bar icon is not accessible
+- show the Dock icon only while the fallback control window is open
 - keep settings inside the dropdown as a second page
 - add a quit action inside the dropdown
 - animate from the timer page into the settings page
@@ -109,8 +110,9 @@ Planned:
 The MVP is done when:
 
 - app launches into the menu bar
-- app is still reachable from the Dock
-- clicking the Dock icon opens a usable control window
+- app launches with no persistent Dock icon
+- launching the app again opens a usable fallback control window when the menu bar item is not accessible
+- the Dock icon appears only while the fallback control window is open
 - user can click the tomato icon to open the dropdown
 - user can start a focus session
 - timer counts down correctly
