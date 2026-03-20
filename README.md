@@ -10,9 +10,11 @@ By default the app stays out of the Dock. If your menu bar is too full and the t
 
 The app shows popup alerts when a focus session or break ends. After a focus session ends, the break timer waits until you acknowledge the popup.
 
+If you want to turn on the Do Not Disturb during focus setting, you need to set up two Shortcuts named `Pomodoro Enable DND` and `Pomodoro Disable DND`. If they are missing or broken, the timer still runs normally and Pomodoro shows a setup reminder.
+
 ## Screenshot
 
-![Pomodoro Timer dropdown](docs/images/screenshot.png)
+![Pomodoro Timer dropdown](docs/images/dropdown_screenshot.png)
 
 ## What You Can Do
 
@@ -21,6 +23,7 @@ The app shows popup alerts when a focus session or break ends. After a focus ses
 - choose your preferred break length
 - keep the timer accessible from the menu bar
 - optionally play a gentle sound when a session ends
+- optionally run Do Not Disturb during focus with Shortcuts
 
 ## Keyboard Shortcuts
 
@@ -35,6 +38,7 @@ You can change:
 - focus length
 - break length
 - sound on or off
+- Do Not Disturb during focus, with two required Shortcuts
 
 ## Run Locally
 

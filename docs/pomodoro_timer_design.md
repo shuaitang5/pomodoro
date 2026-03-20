@@ -35,6 +35,7 @@ The dropdown panel shows:
 
 - a main timer page with countdown, status, `Start`, `Reset`, `Settings`, and `Quit`
 - a settings page with focus, break, and sound controls
+- an optional Do Not Disturb during focus toggle that uses named Shortcuts
 - the panel aligns to the left edge of the menu bar icon by default and flips to right-edge alignment when the icon is near the screen edge
 
 When the user clicks `Settings`:
@@ -62,6 +63,7 @@ When focus ends:
 - always show an in-app popup window
 - show the dropdown timer panel together with the popup
 - play a gentle sound if enabled
+- optionally run the Do Not Disturb off shortcut
 - wait for the user to acknowledge the popup before starting the break timer
 
 When break ends:
@@ -77,6 +79,8 @@ The settings page lets the user control:
 - focus preset
 - break preset
 - gentle sound on/off
+- Do Not Disturb during focus on/off
+- a setup reminder if the required Shortcuts are missing when the toggle is turned on
 - fit all controls without requiring scrolling
 
 ## Shortcuts
@@ -93,8 +97,11 @@ The settings page lets the user control:
 - `PomodoroEngine` for timer state and transitions
 - `PomodoroViewModel` for UI-facing behavior
 - `NotificationManager` for gentle sound delivery
+- `DoNotDisturbShortcutController` for optional Shortcuts-based DND automation
 - `AppSettingsStore` for saved user preferences
 - shared app state so the menu bar and temporary Dock fallback stay in sync
+
+If the required Shortcuts automation is missing, the app falls back to a normal Pomodoro session and leaves Do Not Disturb unchanged.
 
 ## Packaging
 

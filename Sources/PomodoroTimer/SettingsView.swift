@@ -2,6 +2,7 @@ import SwiftUI
 
 struct SettingsView: View {
     @ObservedObject var settings: AppSettingsStore
+    @ObservedObject var viewModel: PomodoroViewModel
     let onDone: () -> Void
 
     private var focusMinutesBinding: Binding<Int> {
@@ -15,6 +16,13 @@ struct SettingsView: View {
         Binding(
             get: { settings.breakMinutes },
             set: { settings.breakMinutes = AppSettingsStore.normalizeBreakMinutes($0) }
+        )
+    }
+
+    private var doNotDisturbBinding: Binding<Bool> {
+        Binding(
+            get: { settings.doNotDisturbDuringFocusEnabled },
+            set: { viewModel.setDoNotDisturbDuringFocusEnabled($0) }
         )
     }
 
@@ -69,6 +77,17 @@ struct SettingsView: View {
                 }
 
                 Toggle("Play gentle sound", isOn: $settings.soundsEnabled)
+
+                VStack(alignment: .leading, spacing: 6) {
+                    Toggle("Turn on Do Not Disturb during focus", isOn: doNotDisturbBinding)
+
+                    Text(
+                        "Requires Shortcuts named \"\(DoNotDisturbShortcutController.enableShortcutName)\" and \"\(DoNotDisturbShortcutController.disableShortcutName)\" that toggle system Do Not Disturb."
+                    )
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                }
             }
             .padding(18)
             .background(

@@ -36,6 +36,12 @@ final class AppSettingsStore: ObservableObject {
         }
     }
 
+    @Published var doNotDisturbDuringFocusEnabled: Bool {
+        didSet {
+            userDefaults.set(doNotDisturbDuringFocusEnabled, forKey: Self.doNotDisturbDuringFocusEnabledKey)
+        }
+    }
+
     var focusDuration: TimeInterval {
         Self.focusDuration(forMinutes: focusMinutes)
     }
@@ -49,6 +55,7 @@ final class AppSettingsStore: ObservableObject {
     private static let focusMinutesKey = "focusMinutes"
     private static let breakMinutesKey = "breakMinutes"
     private static let soundsEnabledKey = "soundsEnabled"
+    private static let doNotDisturbDuringFocusEnabledKey = "doNotDisturbDuringFocusEnabled"
 
     init(userDefaults: UserDefaults = .standard) {
         self.userDefaults = userDefaults
@@ -62,6 +69,7 @@ final class AppSettingsStore: ObservableObject {
             ? (persistedBreakMinutes ?? Self.defaultBreakMinutes)
             : Self.defaultBreakMinutes
         self.soundsEnabled = userDefaults.object(forKey: Self.soundsEnabledKey) as? Bool ?? true
+        self.doNotDisturbDuringFocusEnabled = userDefaults.object(forKey: Self.doNotDisturbDuringFocusEnabledKey) as? Bool ?? false
     }
 
     static func normalizeFocusMinutes(_ value: Int) -> Int {

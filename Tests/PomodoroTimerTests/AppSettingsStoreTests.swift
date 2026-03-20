@@ -32,11 +32,13 @@ final class AppSettingsStoreTests: XCTestCase {
         store.focusMinutes = 20
         store.breakMinutes = 7
         store.soundsEnabled = false
+        store.doNotDisturbDuringFocusEnabled = true
 
         XCTAssertEqual(defaults.object(forKey: "focusMinutes") as? Int, 20)
         XCTAssertEqual(defaults.object(forKey: "breakMinutes") as? Int, 5)
         XCTAssertEqual(store.breakMinutes, 5)
         XCTAssertEqual(defaults.object(forKey: "soundsEnabled") as? Bool, false)
+        XCTAssertEqual(defaults.object(forKey: "doNotDisturbDuringFocusEnabled") as? Bool, true)
     }
 
     func testNormalizationUsesNearestAllowedPreset() {

@@ -10,6 +10,9 @@ Final integration and QA pass for the macOS Pomodoro MVP.
 - Launch the app again and confirm the fallback control window opens in front
 - Close the fallback control window and confirm the Dock icon disappears again
 - Start focus session from button and with `Space`
+- If Do Not Disturb during focus is enabled and the required Shortcuts exist, confirm the on shortcut runs at focus start and the off shortcut runs at focus end or reset
+- If the required Shortcuts are missing, confirm enabling the setting shows a setup reminder and leaves the toggle off
+- If the toggle was previously on but the Focus automation fails at focus start, confirm the focus session still starts and Pomodoro shows a setup reminder instead of crashing
 - Reset from button and with `R`
 - Open settings from gear button and `Cmd+,`
 - Countdown updates in the UI
@@ -26,6 +29,7 @@ Final integration and QA pass for the macOS Pomodoro MVP.
   - focus preset
   - break preset
   - sound toggle
+  - Do Not Disturb during focus toggle
 - Invalid saved duration values fall back to:
   - `25` focus
   - `5` break
@@ -49,6 +53,7 @@ Final integration and QA pass for the macOS Pomodoro MVP.
 - Break timer ends and the app returns to idle
 - If the user walks away, the app waits in idle for the next manual start
 - User-selected focus and break presets persist across launches
+- Missing Do Not Disturb automation never blocks or crashes the timer flow
 - Packaging clears preferences on the build machine before generating a fresh app bundle
 
 ## Verification Commands

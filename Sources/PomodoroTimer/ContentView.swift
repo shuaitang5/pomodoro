@@ -32,7 +32,7 @@ struct ContentView: View {
                 timerPage
                     .frame(width: geometry.size.width, height: geometry.size.height)
 
-                SettingsView(settings: settings) {
+                SettingsView(settings: settings, viewModel: viewModel) {
                     withAnimation(.easeInOut(duration: 0.22)) {
                         panelState.showTimer()
                     }

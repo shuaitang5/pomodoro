@@ -81,7 +81,9 @@ Implemented:
 
 - popup window support
 - gentle sound
-- settings UI for focus/break presets and sound preferences
+- optional Do Not Disturb during focus via named Shortcuts
+- settings UI for focus/break presets, sound preferences, and Do Not Disturb toggle
+- setup reminder and safe fallback when the Do Not Disturb automation is missing or broken
 - in-dropdown settings page behavior
 - keyboard shortcuts:
   - `Space`
@@ -124,3 +126,5 @@ The MVP is done when:
 - settings fit without scrolling
 - user can quit from the dropdown
 - presets and sound preference work
+- optional Do Not Disturb during focus automation works when the required Shortcuts exist
+- missing Do Not Disturb automation does not interrupt the Pomodoro timer flow

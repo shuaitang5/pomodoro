@@ -37,6 +37,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         MenuBarController.shared.configure()
     }
 
+    func applicationWillTerminate(_ notification: Notification) {
+        AppEnvironment.shared.viewModel.handleApplicationTermination()
+    }
+
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
         if !flag {
             ControlWindowController.shared.show()

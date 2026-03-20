@@ -8,11 +8,13 @@ final class PomodoroViewModelTests: XCTestCase {
         let settings = AppSettingsStore(userDefaults: defaults)
         let notifications = NotificationManagerSpy()
         let alerts = AlertPresenterSpy()
+        let doNotDisturb = DoNotDisturbControllerSpy()
         let now = Date(timeIntervalSince1970: 100)
         let viewModel = PomodoroViewModel(
             settings: settings,
             notificationManager: notifications,
             alertPresenter: alerts,
+            doNotDisturbController: doNotDisturb,
             engine: PomodoroEngine(focusDuration: 10, breakDuration: 5),
             now: { now }
         )
@@ -24,6 +26,7 @@ final class PomodoroViewModelTests: XCTestCase {
         XCTAssertFalse(viewModel.isStartEnabled)
         XCTAssertTrue(alerts.presentedAlerts.isEmpty)
         XCTAssertEqual(notifications.gentleSoundPlayCount, 0)
+        XCTAssertEqual(doNotDisturb.enableCount, 0)
     }
 
     func testFocusCompletionTriggersBreakAlertAndNotification() {
@@ -32,11 +35,13 @@ final class PomodoroViewModelTests: XCTestCase {
         settings.breakMinutes = 5
         let notifications = NotificationManagerSpy()
         let alerts = AlertPresenterSpy()
+        let doNotDisturb = DoNotDisturbControllerSpy()
         var now = Date(timeIntervalSince1970: 100)
         let viewModel = PomodoroViewModel(
             settings: settings,
             notificationManager: notifications,
             alertPresenter: alerts,
+            doNotDisturbController: doNotDisturb,
             engine: PomodoroEngine(focusDuration: 10, breakDuration: 5),
             now: { now }
         )
@@ -50,6 +55,7 @@ final class PomodoroViewModelTests: XCTestCase {
         XCTAssertEqual(alerts.presentedAlerts.first?.title, "Pomodoro complete")
         XCTAssertEqual(alerts.presentedAlerts.first?.message, "Time for a 5-minute break.")
         XCTAssertEqual(notifications.gentleSoundPlayCount, 1)
+        XCTAssertEqual(doNotDisturb.disableCount, 0)
     }
 
     func testBreakCompletionReturnsToIdleAndAlertsUser() {
@@ -57,11 +63,13 @@ final class PomodoroViewModelTests: XCTestCase {
         let settings = AppSettingsStore(userDefaults: defaults)
         let notifications = NotificationManagerSpy()
         let alerts = AlertPresenterSpy()
+        let doNotDisturb = DoNotDisturbControllerSpy()
         var now = Date(timeIntervalSince1970: 100)
         let viewModel = PomodoroViewModel(
             settings: settings,
             notificationManager: notifications,
             alertPresenter: alerts,
+            doNotDisturbController: doNotDisturb,
             engine: PomodoroEngine(focusDuration: 10, breakDuration: 5),
             now: { now }
         )
@@ -79,6 +87,7 @@ final class PomodoroViewModelTests: XCTestCase {
         XCTAssertEqual(alerts.presentedAlerts.last?.title, "Break complete")
         XCTAssertEqual(alerts.presentedAlerts.count, 2)
         XCTAssertEqual(notifications.gentleSoundPlayCount, 2)
+        XCTAssertEqual(doNotDisturb.disableCount, 0)
     }
 
     func testResetReturnsToIdleWithoutTriggeringAlerts() {
@@ -86,10 +95,12 @@ final class PomodoroViewModelTests: XCTestCase {
         let settings = AppSettingsStore(userDefaults: defaults)
         let notifications = NotificationManagerSpy()
         let alerts = AlertPresenterSpy()
+        let doNotDisturb = DoNotDisturbControllerSpy()
         let viewModel = PomodoroViewModel(
             settings: settings,
             notificationManager: notifications,
             alertPresenter: alerts,
+            doNotDisturbController: doNotDisturb,
             engine: PomodoroEngine(focusDuration: 10, breakDuration: 5),
             now: { Date(timeIntervalSince1970: 100) }
         )
@@ -102,6 +113,7 @@ final class PomodoroViewModelTests: XCTestCase {
         XCTAssertTrue(viewModel.isStartEnabled)
         XCTAssertTrue(alerts.presentedAlerts.isEmpty)
         XCTAssertEqual(notifications.gentleSoundPlayCount, 0)
+        XCTAssertEqual(doNotDisturb.disableCount, 0)
     }
 
     func testDisablingSoundsKeepsPopupWithoutPlayingSound() {
@@ -110,11 +122,13 @@ final class PomodoroViewModelTests: XCTestCase {
         settings.soundsEnabled = false
         let notifications = NotificationManagerSpy()
         let alerts = AlertPresenterSpy()
+        let doNotDisturb = DoNotDisturbControllerSpy()
         var now = Date(timeIntervalSince1970: 100)
         let viewModel = PomodoroViewModel(
             settings: settings,
             notificationManager: notifications,
             alertPresenter: alerts,
+            doNotDisturbController: doNotDisturb,
             engine: PomodoroEngine(focusDuration: 10, breakDuration: 5),
             now: { now }
         )
@@ -127,6 +141,7 @@ final class PomodoroViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.statusText, "Break ready to start")
         XCTAssertEqual(viewModel.timerText, "00:05")
         XCTAssertEqual(notifications.gentleSoundPlayCount, 0)
+        XCTAssertEqual(doNotDisturb.disableCount, 0)
     }
 
     func testBreakWaitsForPopupAcknowledgementBeforeCountdownStarts() {
@@ -134,11 +149,13 @@ final class PomodoroViewModelTests: XCTestCase {
         let settings = AppSettingsStore(userDefaults: defaults)
         let notifications = NotificationManagerSpy()
         let alerts = AlertPresenterSpy()
+        let doNotDisturb = DoNotDisturbControllerSpy()
         var now = Date(timeIntervalSince1970: 100)
         let viewModel = PomodoroViewModel(
             settings: settings,
             notificationManager: notifications,
             alertPresenter: alerts,
+            doNotDisturbController: doNotDisturb,
             engine: PomodoroEngine(focusDuration: 10, breakDuration: 5),
             now: { now }
         )
@@ -161,6 +178,7 @@ final class PomodoroViewModelTests: XCTestCase {
         XCTAssertEqual(viewModel.timerText, "00:03")
         XCTAssertEqual(alerts.presentedAlerts.count, 1)
         XCTAssertEqual(notifications.gentleSoundPlayCount, 1)
+        XCTAssertEqual(doNotDisturb.disableCount, 0)
     }
 
     func testChangingFocusMinutesWhileIdleUpdatesDisplayedTimerImmediately() {
@@ -168,10 +186,12 @@ final class PomodoroViewModelTests: XCTestCase {
         let settings = AppSettingsStore(userDefaults: defaults)
         let notifications = NotificationManagerSpy()
         let alerts = AlertPresenterSpy()
+        let doNotDisturb = DoNotDisturbControllerSpy()
         let viewModel = PomodoroViewModel(
             settings: settings,
             notificationManager: notifications,
-            alertPresenter: alerts
+            alertPresenter: alerts,
+            doNotDisturbController: doNotDisturb
         )
 
         settings.focusMinutes = 20
@@ -182,6 +202,7 @@ final class PomodoroViewModelTests: XCTestCase {
             String(format: "%02d:%02d", expectedSeconds / 60, expectedSeconds % 60)
         )
         XCTAssertEqual(viewModel.statusText, "Ready to focus")
+        XCTAssertEqual(doNotDisturb.enableCount, 0)
     }
 
     func testResetAndBreakCompletionReturnToCurrentSettingsDuration() {
@@ -190,11 +211,13 @@ final class PomodoroViewModelTests: XCTestCase {
         settings.focusMinutes = 25
         let notifications = NotificationManagerSpy()
         let alerts = AlertPresenterSpy()
+        let doNotDisturb = DoNotDisturbControllerSpy()
         var now = Date(timeIntervalSince1970: 100)
         let viewModel = PomodoroViewModel(
             settings: settings,
             notificationManager: notifications,
             alertPresenter: alerts,
+            doNotDisturbController: doNotDisturb,
             engine: PomodoroEngine(focusDuration: 15 * 60, breakDuration: 5 * 60),
             now: { now }
         )
@@ -214,6 +237,153 @@ final class PomodoroViewModelTests: XCTestCase {
 
         XCTAssertEqual(viewModel.timerText, "30:00")
         XCTAssertEqual(viewModel.statusText, "Ready to focus")
+        XCTAssertEqual(doNotDisturb.enableCount, 0)
+    }
+
+    func testStartingFocusWithDoNotDisturbEnabledRunsEnableShortcut() {
+        let defaults = makeUserDefaults()
+        let settings = AppSettingsStore(userDefaults: defaults)
+        settings.doNotDisturbDuringFocusEnabled = true
+        let notifications = NotificationManagerSpy()
+        let alerts = AlertPresenterSpy()
+        let doNotDisturb = DoNotDisturbControllerSpy()
+        let viewModel = PomodoroViewModel(
+            settings: settings,
+            notificationManager: notifications,
+            alertPresenter: alerts,
+            doNotDisturbController: doNotDisturb,
+            engine: PomodoroEngine(focusDuration: 10, breakDuration: 5),
+            now: { Date(timeIntervalSince1970: 100) }
+        )
+
+        viewModel.start()
+
+        XCTAssertEqual(doNotDisturb.enableCount, 1)
+        XCTAssertEqual(doNotDisturb.disableCount, 0)
+    }
+
+    func testEnablingDoNotDisturbWithoutSetupShowsAlertAndKeepsSettingOff() {
+        let defaults = makeUserDefaults()
+        let settings = AppSettingsStore(userDefaults: defaults)
+        let notifications = NotificationManagerSpy()
+        let alerts = AlertPresenterSpy()
+        let doNotDisturb = DoNotDisturbControllerSpy()
+        doNotDisturb.hasRequiredSetupResult = false
+        let viewModel = PomodoroViewModel(
+            settings: settings,
+            notificationManager: notifications,
+            alertPresenter: alerts,
+            doNotDisturbController: doNotDisturb,
+            engine: PomodoroEngine(focusDuration: 10, breakDuration: 5),
+            now: { Date(timeIntervalSince1970: 100) }
+        )
+
+        viewModel.setDoNotDisturbDuringFocusEnabled(true)
+
+        XCTAssertFalse(settings.doNotDisturbDuringFocusEnabled)
+        XCTAssertEqual(doNotDisturb.hasRequiredSetupCount, 1)
+        XCTAssertEqual(alerts.presentedAlerts.first?.title, "Set up Do Not Disturb")
+        XCTAssertEqual(alerts.presentedAlerts.first?.message, doNotDisturb.setupInstructions)
+    }
+
+    func testFocusStillStartsNormallyWhenDoNotDisturbEnableFails() {
+        let defaults = makeUserDefaults()
+        let settings = AppSettingsStore(userDefaults: defaults)
+        settings.doNotDisturbDuringFocusEnabled = true
+        let notifications = NotificationManagerSpy()
+        let alerts = AlertPresenterSpy()
+        let doNotDisturb = DoNotDisturbControllerSpy()
+        doNotDisturb.enableReturnValue = false
+        let viewModel = PomodoroViewModel(
+            settings: settings,
+            notificationManager: notifications,
+            alertPresenter: alerts,
+            doNotDisturbController: doNotDisturb,
+            engine: PomodoroEngine(focusDuration: 10, breakDuration: 5),
+            now: { Date(timeIntervalSince1970: 100) }
+        )
+
+        viewModel.start()
+
+        XCTAssertEqual(viewModel.statusText, "Focus session in progress")
+        XCTAssertEqual(viewModel.timerText, "00:10")
+        XCTAssertFalse(viewModel.isStartEnabled)
+        XCTAssertFalse(settings.doNotDisturbDuringFocusEnabled)
+        XCTAssertEqual(doNotDisturb.enableCount, 1)
+        XCTAssertEqual(doNotDisturb.disableCount, 0)
+        XCTAssertEqual(alerts.presentedAlerts.first?.title, "Set up Do Not Disturb")
+        XCTAssertEqual(alerts.presentedAlerts.first?.message, doNotDisturb.setupInstructions)
+    }
+
+    func testFocusCompletionWithDoNotDisturbEnabledRunsDisableShortcut() {
+        let defaults = makeUserDefaults()
+        let settings = AppSettingsStore(userDefaults: defaults)
+        settings.doNotDisturbDuringFocusEnabled = true
+        let notifications = NotificationManagerSpy()
+        let alerts = AlertPresenterSpy()
+        let doNotDisturb = DoNotDisturbControllerSpy()
+        var now = Date(timeIntervalSince1970: 100)
+        let viewModel = PomodoroViewModel(
+            settings: settings,
+            notificationManager: notifications,
+            alertPresenter: alerts,
+            doNotDisturbController: doNotDisturb,
+            engine: PomodoroEngine(focusDuration: 10, breakDuration: 5),
+            now: { now }
+        )
+
+        viewModel.start()
+        now = now.addingTimeInterval(10)
+        viewModel.processTick()
+
+        XCTAssertEqual(doNotDisturb.enableCount, 1)
+        XCTAssertEqual(doNotDisturb.disableCount, 1)
+    }
+
+    func testResetDuringFocusWithDoNotDisturbEnabledRunsDisableShortcut() {
+        let defaults = makeUserDefaults()
+        let settings = AppSettingsStore(userDefaults: defaults)
+        settings.doNotDisturbDuringFocusEnabled = true
+        let notifications = NotificationManagerSpy()
+        let alerts = AlertPresenterSpy()
+        let doNotDisturb = DoNotDisturbControllerSpy()
+        let viewModel = PomodoroViewModel(
+            settings: settings,
+            notificationManager: notifications,
+            alertPresenter: alerts,
+            doNotDisturbController: doNotDisturb,
+            engine: PomodoroEngine(focusDuration: 10, breakDuration: 5),
+            now: { Date(timeIntervalSince1970: 100) }
+        )
+
+        viewModel.start()
+        viewModel.reset()
+
+        XCTAssertEqual(doNotDisturb.enableCount, 1)
+        XCTAssertEqual(doNotDisturb.disableCount, 1)
+    }
+
+    func testTurningOffDoNotDisturbSettingMidFocusRunsDisableShortcut() {
+        let defaults = makeUserDefaults()
+        let settings = AppSettingsStore(userDefaults: defaults)
+        settings.doNotDisturbDuringFocusEnabled = true
+        let notifications = NotificationManagerSpy()
+        let alerts = AlertPresenterSpy()
+        let doNotDisturb = DoNotDisturbControllerSpy()
+        let viewModel = PomodoroViewModel(
+            settings: settings,
+            notificationManager: notifications,
+            alertPresenter: alerts,
+            doNotDisturbController: doNotDisturb,
+            engine: PomodoroEngine(focusDuration: 10, breakDuration: 5),
+            now: { Date(timeIntervalSince1970: 100) }
+        )
+
+        viewModel.start()
+        settings.doNotDisturbDuringFocusEnabled = false
+
+        XCTAssertEqual(doNotDisturb.enableCount, 1)
+        XCTAssertEqual(doNotDisturb.disableCount, 1)
     }
 
     private func makeUserDefaults() -> UserDefaults {
@@ -255,5 +425,31 @@ private final class AlertPresenterSpy: InAppAlertPresenting {
         }
 
         dismiss()
+    }
+}
+
+@MainActor
+private final class DoNotDisturbControllerSpy: DoNotDisturbHandling {
+    var setupInstructions = "Create the required Do Not Disturb shortcuts."
+    var hasRequiredSetupResult = true
+    var hasRequiredSetupCount = 0
+    var enableCount = 0
+    var disableCount = 0
+    var enableReturnValue = true
+    var disableReturnValue = true
+
+    func hasRequiredSetup() -> Bool {
+        hasRequiredSetupCount += 1
+        return hasRequiredSetupResult
+    }
+
+    func enableDoNotDisturb() -> Bool {
+        enableCount += 1
+        return enableReturnValue
+    }
+
+    func disableDoNotDisturb() -> Bool {
+        disableCount += 1
+        return disableReturnValue
     }
 }

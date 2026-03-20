@@ -12,18 +12,22 @@ final class PomodoroViewModel: ObservableObject {
     private let settings: AppSettingsStore
     private let notificationManager: NotificationHandling
     private let alertPresenter: InAppAlertPresenting
+    private let doNotDisturbController: DoNotDisturbHandling
+    private var managesDoNotDisturbForCurrentFocus = false
     private var cancellables = Set<AnyCancellable>()
 
     init(
         settings: AppSettingsStore,
         notificationManager: NotificationHandling = NotificationManager(),
         alertPresenter: InAppAlertPresenting = CompletionAlertPresenter(),
+        doNotDisturbController: DoNotDisturbHandling = DoNotDisturbShortcutController(),
         engine: PomodoroEngine? = nil,
         now: @escaping () -> Date = Date.init
     ) {
         self.settings = settings
         self.notificationManager = notificationManager
         self.alertPresenter = alertPresenter
+        self.doNotDisturbController = doNotDisturbController
         let configuredEngine = engine ?? PomodoroEngine(
             focusDuration: settings.focusDuration,
             breakDuration: settings.breakDuration
@@ -46,6 +50,13 @@ final class PomodoroViewModel: ObservableObject {
                     breakDuration: AppSettingsStore.breakDuration(forMinutes: breakMinutes)
                 )
                 self.syncFromEngine()
+            }
+            .store(in: &cancellables)
+
+        settings.$doNotDisturbDuringFocusEnabled
+            .dropFirst()
+            .sink { [weak self] isEnabled in
+                self?.handleDoNotDisturbPreferenceChanged(isEnabled)
             }
             .store(in: &cancellables)
     }
@@ -73,6 +84,21 @@ final class PomodoroViewModel: ObservableObject {
         phase == .idle
     }
 
+    func setDoNotDisturbDuringFocusEnabled(_ isEnabled: Bool) {
+        guard isEnabled else {
+            settings.doNotDisturbDuringFocusEnabled = false
+            return
+        }
+
+        guard doNotDisturbController.hasRequiredSetup() else {
+            settings.doNotDisturbDuringFocusEnabled = false
+            presentDoNotDisturbSetupAlert()
+            return
+        }
+
+        settings.doNotDisturbDuringFocusEnabled = true
+    }
+
     func start() {
         guard phase == .idle else {
             return
@@ -80,15 +106,23 @@ final class PomodoroViewModel: ObservableObject {
 
         engine.start(now: now())
         syncFromEngine()
+        enableDoNotDisturbForFocusIfNeeded()
         startTimer()
     }
 
     func reset() {
         timer?.invalidate()
         timer = nil
+        disableDoNotDisturbIfManaged()
         syncEngineDurationsToSettings()
         engine.reset()
         syncFromEngine()
+    }
+
+    func handleApplicationTermination() {
+        timer?.invalidate()
+        timer = nil
+        disableDoNotDisturbIfManaged()
     }
 
     func processTick() {
@@ -103,6 +137,7 @@ final class PomodoroViewModel: ObservableObject {
         case .focusCompleted:
             timer?.invalidate()
             timer = nil
+            disableDoNotDisturbIfManaged()
             handleFocusCompleted()
         case .breakCompleted:
             timer?.invalidate()
@@ -168,5 +203,48 @@ final class PomodoroViewModel: ObservableObject {
         }
 
         alertPresenter.presentAlert(title: title, message: message, onDismiss: onDismiss)
+    }
+
+    private func handleDoNotDisturbPreferenceChanged(_ isEnabled: Bool) {
+        guard phase == .focusRunning else {
+            return
+        }
+
+        if isEnabled {
+            enableDoNotDisturbForFocusIfNeeded()
+        } else {
+            disableDoNotDisturbIfManaged()
+        }
+    }
+
+    private func enableDoNotDisturbForFocusIfNeeded() {
+        guard settings.doNotDisturbDuringFocusEnabled, !managesDoNotDisturbForCurrentFocus else {
+            return
+        }
+
+        guard doNotDisturbController.enableDoNotDisturb() else {
+            settings.doNotDisturbDuringFocusEnabled = false
+            presentDoNotDisturbSetupAlert()
+            return
+        }
+
+        managesDoNotDisturbForCurrentFocus = true
+    }
+
+    private func disableDoNotDisturbIfManaged() {
+        guard managesDoNotDisturbForCurrentFocus else {
+            return
+        }
+
+        _ = doNotDisturbController.disableDoNotDisturb()
+        managesDoNotDisturbForCurrentFocus = false
+    }
+
+    private func presentDoNotDisturbSetupAlert() {
+        alertPresenter.presentAlert(
+            title: "Set up Do Not Disturb",
+            message: doNotDisturbController.setupInstructions,
+            onDismiss: {}
+        )
     }
 }
