@@ -68,7 +68,7 @@ private final class AlertWindowController: NSWindowController, NSWindowDelegate 
             rootView: CompletionAlertView(title: title, message: message)
         )
 
-        let window = NSWindow(contentViewController: hostingController)
+        let window = AlertWindow(contentViewController: hostingController)
         window.title = title
         window.styleMask = [.titled, .closable]
         window.titlebarAppearsTransparent = true
@@ -82,6 +82,9 @@ private final class AlertWindowController: NSWindowController, NSWindowDelegate 
         super.init(window: window)
 
         window.delegate = self
+        window.onAcknowledge = { [weak self] in
+            self?.close()
+        }
         hostingController.rootView = CompletionAlertView(title: title, message: message) { [weak self] in
             self?.close()
         }
@@ -101,6 +104,26 @@ private final class AlertWindowController: NSWindowController, NSWindowDelegate 
 
     func windowWillClose(_ notification: Notification) {
         onClose()
+    }
+}
+
+private final class AlertWindow: NSWindow {
+    var onAcknowledge: () -> Void = {}
+
+    override func performKeyEquivalent(with event: NSEvent) -> Bool {
+        guard event.type == .keyDown else {
+            return super.performKeyEquivalent(with: event)
+        }
+
+        guard CompletionAlertKeyboardShortcut.shouldAcknowledge(
+            keyCode: event.keyCode,
+            modifierFlags: event.modifierFlags
+        ) else {
+            return super.performKeyEquivalent(with: event)
+        }
+
+        onAcknowledge()
+        return true
     }
 }
 
