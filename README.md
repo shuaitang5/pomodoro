@@ -14,7 +14,7 @@ If you want to turn on the Do Not Disturb during focus setting, you need to set 
 
 ## Screenshot
 
-![Pomodoro Timer dropdown](docs/images/dropdown_screenshot.png)
+![Pomodoro Timer dropdown](docs/images/screenshot.png)
 
 ## What You Can Do
 
