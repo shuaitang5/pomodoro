@@ -1,4 +1,5 @@
 import AppKit
+import Combine
 import SwiftUI
 
 @MainActor
@@ -16,6 +17,7 @@ final class MenuBarController: NSObject, NSWindowDelegate {
     private var panel: MenuBarPanel?
     private var localClickMonitor: Any?
     private var globalClickMonitor: Any?
+    private var menuBarIconObserver: AnyCancellable?
 
     func configure() {
         guard statusItem == nil else {
@@ -23,11 +25,12 @@ final class MenuBarController: NSObject, NSWindowDelegate {
         }
 
         let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
-        item.button?.image = MenuBarTomatoImage.icon
         item.button?.target = self
         item.button?.action = #selector(togglePanel(_:))
 
         statusItem = item
+        observeMenuBarIconStateIfNeeded()
+        updateStatusItemIcon(AppEnvironment.shared.viewModel.menuBarIconState)
     }
 
     func showPanel() {
@@ -257,6 +260,22 @@ final class MenuBarController: NSObject, NSWindowDelegate {
         }
 
         return buttonWindow.frame
+    }
+
+    private func observeMenuBarIconStateIfNeeded() {
+        guard menuBarIconObserver == nil else {
+            return
+        }
+
+        menuBarIconObserver = AppEnvironment.shared.viewModel.$menuBarIconState
+            .removeDuplicates()
+            .sink { [weak self] state in
+                self?.updateStatusItemIcon(state)
+            }
+    }
+
+    private func updateStatusItemIcon(_ state: MenuBarIconState) {
+        statusItem?.button?.image = MenuBarTomatoImage.icon(for: state)
     }
 }
 

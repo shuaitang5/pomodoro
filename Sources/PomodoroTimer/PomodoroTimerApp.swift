@@ -52,10 +52,24 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 }
 
 enum MenuBarTomatoImage {
-    static let icon: NSImage = {
+    private static let idleOpacity: CGFloat = 0.56
+
+    private static let activeIcon = makeIcon(fillColor: .labelColor)
+    private static let idleIcon = makeIcon(fillColor: NSColor.labelColor.withAlphaComponent(idleOpacity))
+
+    static func icon(for state: MenuBarIconState) -> NSImage {
+        switch state {
+        case .idle:
+            return idleIcon
+        case .active:
+            return activeIcon
+        }
+    }
+
+    private static func makeIcon(fillColor: NSColor) -> NSImage {
         let size = NSSize(width: 18, height: 18)
         let image = NSImage(size: size, flipped: false) { _ in
-            NSColor.labelColor.setFill()
+            fillColor.setFill()
 
             NSBezierPath(ovalIn: NSRect(x: 2.2, y: 1.8, width: 13.6, height: 11.8)).fill()
 
@@ -95,5 +109,5 @@ enum MenuBarTomatoImage {
 
         image.isTemplate = true
         return image
-    }()
+    }
 }

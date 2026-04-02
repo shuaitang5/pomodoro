@@ -1,10 +1,20 @@
 import Combine
 import Foundation
 
+enum MenuBarIconState: Equatable {
+    case idle
+    case active
+
+    init(phase: PomodoroPhase) {
+        self = phase == .idle ? .idle : .active
+    }
+}
+
 @MainActor
 final class PomodoroViewModel: ObservableObject {
     @Published private(set) var phase: PomodoroPhase
     @Published private(set) var remainingSeconds: Int
+    @Published private(set) var menuBarIconState: MenuBarIconState
 
     private var engine: PomodoroEngine
     private var timer: Timer?
@@ -35,6 +45,7 @@ final class PomodoroViewModel: ObservableObject {
         self.engine = configuredEngine
         self.phase = configuredEngine.phase
         self.remainingSeconds = configuredEngine.remainingSeconds
+        self.menuBarIconState = MenuBarIconState(phase: configuredEngine.phase)
         self.now = now
 
         settings.$focusMinutes
@@ -160,6 +171,7 @@ final class PomodoroViewModel: ObservableObject {
     private func syncFromEngine() {
         phase = engine.phase
         remainingSeconds = engine.remainingSeconds
+        menuBarIconState = MenuBarIconState(phase: engine.phase)
     }
 
     private func syncEngineDurationsToSettings() {

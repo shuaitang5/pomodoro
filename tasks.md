@@ -107,6 +107,23 @@ Planned:
 - packaging verification after menu bar conversion
 - final cleanup of rough edges
 
+## Task 6: Menu Bar Status Cue
+
+Status: completed
+
+Implemented:
+
+- keep the full-strength tomato menu bar icon for any non-idle timer phase
+- dim the tomato icon while the app is idle so the resting state reads differently at a glance
+- document the feature in a dedicated feature log
+
+Key files:
+
+- `Sources/PomodoroTimer/MenuBarController.swift`
+- `Sources/PomodoroTimer/PomodoroTimerApp.swift`
+- `Sources/PomodoroTimer/PomodoroViewModel.swift`
+- `docs/feature_log.md`
+
 ## Current MVP Definition
 
 The MVP is done when:

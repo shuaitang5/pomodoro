@@ -30,6 +30,7 @@ Core flow:
 The menu bar itself shows:
 
 - a monochrome tomato icon
+- a lighter tomato icon while idle, switching back to the full-opacity icon during any active focus or break flow
 
 The dropdown panel shows:
 

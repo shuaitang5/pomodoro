@@ -23,6 +23,7 @@ final class PomodoroViewModelTests: XCTestCase {
 
         XCTAssertEqual(viewModel.statusText, "Focus session in progress")
         XCTAssertEqual(viewModel.timerText, "00:10")
+        XCTAssertEqual(viewModel.menuBarIconState, .active)
         XCTAssertFalse(viewModel.isStartEnabled)
         XCTAssertTrue(alerts.presentedAlerts.isEmpty)
         XCTAssertEqual(notifications.gentleSoundPlayCount, 0)
@@ -83,6 +84,7 @@ final class PomodoroViewModelTests: XCTestCase {
 
         XCTAssertEqual(viewModel.statusText, "Ready to focus")
         XCTAssertEqual(viewModel.timerText, "25:00")
+        XCTAssertEqual(viewModel.menuBarIconState, .idle)
         XCTAssertTrue(viewModel.isStartEnabled)
         XCTAssertEqual(alerts.presentedAlerts.last?.title, "Break complete")
         XCTAssertEqual(alerts.presentedAlerts.count, 2)
@@ -110,6 +112,7 @@ final class PomodoroViewModelTests: XCTestCase {
 
         XCTAssertEqual(viewModel.statusText, "Ready to focus")
         XCTAssertEqual(viewModel.timerText, "25:00")
+        XCTAssertEqual(viewModel.menuBarIconState, .idle)
         XCTAssertTrue(viewModel.isStartEnabled)
         XCTAssertTrue(alerts.presentedAlerts.isEmpty)
         XCTAssertEqual(notifications.gentleSoundPlayCount, 0)
@@ -169,6 +172,7 @@ final class PomodoroViewModelTests: XCTestCase {
 
         XCTAssertEqual(viewModel.statusText, "Break ready to start")
         XCTAssertEqual(viewModel.timerText, "00:05")
+        XCTAssertEqual(viewModel.menuBarIconState, .active)
 
         alerts.acknowledgeLastAlert()
         now = now.addingTimeInterval(2)
@@ -179,6 +183,22 @@ final class PomodoroViewModelTests: XCTestCase {
         XCTAssertEqual(alerts.presentedAlerts.count, 1)
         XCTAssertEqual(notifications.gentleSoundPlayCount, 1)
         XCTAssertEqual(doNotDisturb.disableCount, 0)
+    }
+
+    func testMenuBarIconStartsIdle() {
+        let defaults = makeUserDefaults()
+        let settings = AppSettingsStore(userDefaults: defaults)
+        let notifications = NotificationManagerSpy()
+        let alerts = AlertPresenterSpy()
+        let doNotDisturb = DoNotDisturbControllerSpy()
+        let viewModel = PomodoroViewModel(
+            settings: settings,
+            notificationManager: notifications,
+            alertPresenter: alerts,
+            doNotDisturbController: doNotDisturb
+        )
+
+        XCTAssertEqual(viewModel.menuBarIconState, .idle)
     }
 
     func testChangingFocusMinutesWhileIdleUpdatesDisplayedTimerImmediately() {
