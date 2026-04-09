@@ -3,7 +3,6 @@ import SwiftUI
 struct SettingsView: View {
     @ObservedObject var settings: AppSettingsStore
     @ObservedObject var viewModel: PomodoroViewModel
-    let onDone: () -> Void
 
     private var focusMinutesBinding: Binding<Int> {
         Binding(
@@ -28,17 +27,9 @@ struct SettingsView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
-            HStack {
-                Text("Settings")
-                    .font(.system(size: 24, weight: .bold, design: .rounded))
-
-                Spacer()
-
-                Button("Done") {
-                    onDone()
-                }
-                .buttonStyle(.borderedProminent)
-            }
+            Text("Settings")
+                .font(.system(size: 24, weight: .bold, design: .rounded))
+                .padding(.top, 2)
 
             VStack(alignment: .leading, spacing: 18) {
                 HStack {
@@ -99,6 +90,8 @@ struct SettingsView: View {
                     .stroke(Color.black.opacity(0.06), lineWidth: 1)
             )
         }
-        .padding(24)
+        .padding(.horizontal, 24)
+        .padding(.top, 16)
+        .padding(.bottom, 24)
     }
 }

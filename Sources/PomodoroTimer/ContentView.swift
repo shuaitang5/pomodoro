@@ -35,11 +35,7 @@ struct ContentView: View {
                 timerPage
                     .frame(width: geometry.size.width, height: geometry.size.height)
 
-                SettingsView(settings: settings, viewModel: viewModel) {
-                    withAnimation(.easeInOut(duration: 0.22)) {
-                        panelState.showTimer()
-                    }
-                }
+                SettingsView(settings: settings, viewModel: viewModel)
                 .frame(width: geometry.size.width, height: geometry.size.height)
             }
             .offset(x: panelState.page == .timer ? 0 : -geometry.size.width)
@@ -47,25 +43,43 @@ struct ContentView: View {
         }
         .frame(width: Self.panelWidth, height: Self.panelHeight)
         .modifier(SurfaceBackgroundModifier(style: surfaceStyle, cornerRadius: surfaceCornerRadius))
+        .overlay(alignment: .topTrailing) {
+            topTrailingButton
+                .padding(.top, 18)
+                .padding(.trailing, 24)
+        }
+    }
+
+    @ViewBuilder
+    private var topTrailingButton: some View {
+        if panelState.page == .timer {
+            Button {
+                withAnimation(.easeInOut(duration: 0.22)) {
+                    panelState.showSettings()
+                }
+            } label: {
+                Image(systemName: "gearshape.fill")
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(Color(red: 0.50, green: 0.32, blue: 0.18))
+            }
+            .buttonStyle(.plain)
+            .help("Settings")
+        } else {
+            Button("Done") {
+                withAnimation(.easeInOut(duration: 0.22)) {
+                    panelState.showTimer()
+                }
+            }
+            .buttonStyle(.borderedProminent)
+        }
     }
 
     private var timerPage: some View {
         VStack(spacing: 14) {
-            HStack {
-                Spacer()
-                Button {
-                    withAnimation(.easeInOut(duration: 0.22)) {
-                        panelState.showSettings()
-                    }
-                } label: {
-                    Image(systemName: "gearshape.fill")
-                        .font(.system(size: 15, weight: .semibold))
-                        .foregroundStyle(Color(red: 0.50, green: 0.32, blue: 0.18))
-                }
-                .buttonStyle(.plain)
-                .help("Settings")
-            }
-            .padding(.top, 2)
+            // Top spacing to keep layout consistent (gear icon moved to cardContainer overlay)
+            Color.clear
+                .frame(height: 15)
+                .padding(.top, 2)
 
             AppIconIllustration(size: 108)
 
