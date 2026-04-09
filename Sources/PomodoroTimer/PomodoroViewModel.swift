@@ -87,11 +87,15 @@ final class PomodoroViewModel: ObservableObject {
         case .breakPending:
             return "Break ready to start"
         case .breakRunning:
-            return "Take a 5-minute break"
+            return "Take a \(configuredBreakMinutes)-minute break"
         }
     }
 
     var isStartEnabled: Bool {
+        phase == .idle
+    }
+
+    var isSessionPresetSelectionEnabled: Bool {
         phase == .idle
     }
 
@@ -258,5 +262,9 @@ final class PomodoroViewModel: ObservableObject {
             message: doNotDisturbController.setupInstructions,
             onDismiss: {}
         )
+    }
+
+    private var configuredBreakMinutes: Int {
+        max(1, Int(engine.breakDuration / 60))
     }
 }

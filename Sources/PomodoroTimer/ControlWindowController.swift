@@ -49,7 +49,7 @@ final class ControlWindowController: NSObject, NSWindowDelegate {
         )
 
         let hostingController = NSHostingController(rootView: contentView)
-        let window = NSWindow(contentViewController: hostingController)
+        let window = ControlWindow(contentViewController: hostingController)
         window.title = "Pomodoro Timer"
         window.styleMask = [.titled, .closable, .miniaturizable]
         window.titleVisibility = .visible
@@ -64,5 +64,31 @@ final class ControlWindowController: NSObject, NSWindowDelegate {
 
         self.window = window
         return window
+    }
+}
+
+private final class ControlWindow: NSWindow {
+    override func keyDown(with event: NSEvent) {
+        if EscapeKeyboardShortcut.shouldHandle(
+            keyCode: event.keyCode,
+            modifierFlags: event.modifierFlags
+        ),
+        AppEnvironment.shared.handleEscapeOnTimerSurface(
+            onDismiss: { [weak self] in
+                self?.close()
+            }
+        ) {
+            return
+        }
+
+        if let action = QuickPresetKeyboardShortcut.action(
+            keyCode: event.keyCode,
+            modifierFlags: event.modifierFlags
+        ),
+        AppEnvironment.shared.handleQuickPresetKeyboardShortcut(action) {
+            return
+        }
+
+        super.keyDown(with: event)
     }
 }

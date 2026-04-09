@@ -8,11 +8,12 @@ Main flow:
 
 1. App launches into the menu bar
 2. User clicks the tomato icon
-3. Dropdown shows timer controls
-4. User starts a focus countdown
-5. Focus completion alerts the user and waits for acknowledgement
-6. Break countdown starts after acknowledgement
-7. Break completion alerts the user and returns to idle
+3. Dropdown shows timer controls and quick session presets
+4. User can pick a `25+5`, `35+10`, or `50+15` preset from the main screen
+5. User starts a focus countdown
+6. Focus completion alerts the user and waits for acknowledgement
+7. Break countdown starts after acknowledgement
+8. Break completion alerts the user and returns to idle
 
 ## Task Breakdown
 
@@ -40,6 +41,7 @@ Implemented:
 
 - replace the standalone window with a custom status-item dropdown panel
 - show timer controls from the menu bar icon
+- add one-click `25+5`, `35+10`, and `50+15` quick presets to the main timer page
 - stay out of the Dock on normal launch
 - open a compact fallback control window when the app is launched again and the menu bar icon is not accessible
 - show the Dock icon only while the fallback control window is open
@@ -82,11 +84,16 @@ Implemented:
 - popup window support
 - gentle sound
 - optional Do Not Disturb during focus via named Shortcuts
-- settings UI for focus/break presets, sound preferences, and Do Not Disturb toggle
+- settings UI for full focus/break preset selection, sound preferences, and Do Not Disturb toggle
 - setup reminder and safe fallback when the Do Not Disturb automation is missing or broken
 - in-dropdown settings page behavior
 - keyboard shortcuts:
   - `Space`
+  - `Tab`
+  - `Shift+Tab`
+  - `Left Arrow`
+  - `Right Arrow`
+  - `Esc`
   - `R`
   - `Cmd+,`
 
@@ -124,6 +131,27 @@ Key files:
 - `Sources/PomodoroTimer/PomodoroViewModel.swift`
 - `docs/feature_log.md`
 
+## Task 7: Main-Screen Quick Session Presets
+
+Status: completed
+
+Implemented:
+
+- expose `25+5`, `35+10`, and `50+15` paired presets on the timer page
+- allow changing the next session in one click without visiting settings
+- keep settings as the full editor for all supported focus and break presets
+- disable quick preset changes while a timer is already running
+- allow `Tab`, `Shift+Tab`, and left/right arrow keys to cycle the quick presets while the timer page is idle
+- allow `Esc` to return from settings to the timer page and dismiss the timer surface from the main page
+
+Key files:
+
+- `Sources/PomodoroTimer/ContentView.swift`
+- `Sources/PomodoroTimer/AppSettingsStore.swift`
+- `Sources/PomodoroTimer/PomodoroViewModel.swift`
+- `Tests/PomodoroTimerTests/AppSettingsStoreTests.swift`
+- `Tests/PomodoroTimerTests/PomodoroViewModelTests.swift`
+
 ## Current MVP Definition
 
 The MVP is done when:
@@ -133,6 +161,7 @@ The MVP is done when:
 - launching the app again opens a usable fallback control window when the menu bar item is not accessible
 - the Dock icon appears only while the fallback control window is open
 - user can click the tomato icon to open the dropdown
+- user can switch between `25+5`, `35+10`, and `50+15` from the main timer page
 - user can start a focus session
 - timer counts down correctly
 - focus completion alerts the user and waits for acknowledgement

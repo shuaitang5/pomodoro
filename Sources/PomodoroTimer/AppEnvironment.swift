@@ -15,4 +15,32 @@ final class AppEnvironment {
     )
 
     private init() {}
+
+    @discardableResult
+    func handleQuickPresetKeyboardShortcut(_ action: QuickPresetKeyboardShortcutAction) -> Bool {
+        guard panelState.page == .timer, viewModel.isSessionPresetSelectionEnabled else {
+            return false
+        }
+
+        switch action {
+        case .previous:
+            settings.cycleQuickSessionPreset(step: -1)
+        case .next:
+            settings.cycleQuickSessionPreset(step: 1)
+        }
+
+        return true
+    }
+
+    @discardableResult
+    func handleEscapeOnTimerSurface(onDismiss: () -> Void) -> Bool {
+        switch panelState.page {
+        case .settings:
+            panelState.showTimer()
+        case .timer:
+            onDismiss()
+        }
+
+        return true
+    }
 }

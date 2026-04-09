@@ -287,4 +287,28 @@ private final class MenuBarPanel: NSPanel {
     override var canBecomeMain: Bool {
         false
     }
+
+    override func keyDown(with event: NSEvent) {
+        if EscapeKeyboardShortcut.shouldHandle(
+            keyCode: event.keyCode,
+            modifierFlags: event.modifierFlags
+        ),
+        AppEnvironment.shared.handleEscapeOnTimerSurface(
+            onDismiss: {
+                MenuBarController.shared.hidePanel()
+            }
+        ) {
+            return
+        }
+
+        if let action = QuickPresetKeyboardShortcut.action(
+            keyCode: event.keyCode,
+            modifierFlags: event.modifierFlags
+        ),
+        AppEnvironment.shared.handleQuickPresetKeyboardShortcut(action) {
+            return
+        }
+
+        super.keyDown(with: event)
+    }
 }

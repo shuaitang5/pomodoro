@@ -20,8 +20,6 @@ struct PomodoroTimerApp: App {
             }
 
             CommandGroup(after: .appSettings) {
-                Divider()
-
                 Button("Quit PomodoroTimer") {
                     NSApp.terminate(nil)
                 }

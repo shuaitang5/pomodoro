@@ -9,6 +9,10 @@ Final integration and QA pass for the macOS Pomodoro MVP.
 - Launch app successfully with only the menu bar item visible
 - Launch the app again and confirm the fallback control window opens in front
 - Close the fallback control window and confirm the Dock icon disappears again
+- Switch between the main-screen `25+5`, `35+10`, and `50+15` quick presets and confirm the current session summary updates without opening settings
+- Press `Tab`, `Shift+Tab`, and the left/right arrow keys on the idle timer page and confirm the quick preset selection cycles in the expected direction
+- Press `Esc` in settings and confirm the timer page returns without dismissing the surface
+- Press `Esc` on the main timer page and confirm the menu bar panel dismisses
 - Start focus session from button and with `Space`
 - If Do Not Disturb during focus is enabled and the required Shortcuts exist, confirm the on shortcut runs at focus start and the off shortcut runs at focus end or reset
 - If the required Shortcuts are missing, confirm enabling the setting shows a setup reminder and leaves the toggle off
@@ -25,6 +29,7 @@ Final integration and QA pass for the macOS Pomodoro MVP.
   - completion alert
   - idle reset
   - timer returning to the currently selected focus preset
+- With `50+15` selected, confirm the focus completion alert says `15-minute break` and the break state reflects the longer break length
 - Settings persist across launches for:
   - focus preset
   - break preset
@@ -42,6 +47,9 @@ Final integration and QA pass for the macOS Pomodoro MVP.
 - Added app-level settings shortcut with `Cmd+,`
 - Added keyboard shortcuts for `Start` and `Reset`
 - Fixed idle timer after full cycle so it returns to the current selected focus preset
+- Added a smaller main-screen quick-preset carousel for `25+5`, `35+10`, and `50+15`
+- Added `Tab`, `Shift+Tab`, and left/right arrow cycling for the idle timer page quick presets
+- Fixed break messaging so it follows the selected break length instead of always saying `5-minute break`
 - Switched bundle ID to `com.pomodorotimer.app`
 - Added ticket-style issue log in `docs/issue_log.md` for notable resolved UI bugs
 
@@ -52,6 +60,7 @@ Final integration and QA pass for the macOS Pomodoro MVP.
 - After the popup is dismissed, the dropdown stays visible until the user clicks elsewhere or toggles the tomato icon
 - Break timer ends and the app returns to idle
 - If the user walks away, the app waits in idle for the next manual start
+- The timer page exposes one-click `25+5`, `35+10`, and `50+15` presets whenever the timer is idle
 - User-selected focus and break presets persist across launches
 - Missing Do Not Disturb automation never blocks or crashes the timer flow
 - Packaging clears preferences on the build machine before generating a fresh app bundle

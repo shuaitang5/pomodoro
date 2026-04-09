@@ -260,6 +260,39 @@ final class PomodoroViewModelTests: XCTestCase {
         XCTAssertEqual(doNotDisturb.enableCount, 0)
     }
 
+    func testApplyingQuickPresetUpdatesIdleTimerAndBreakMessaging() {
+        let defaults = makeUserDefaults()
+        let settings = AppSettingsStore(userDefaults: defaults)
+        let notifications = NotificationManagerSpy()
+        let alerts = AlertPresenterSpy()
+        let doNotDisturb = DoNotDisturbControllerSpy()
+        var now = Date(timeIntervalSince1970: 100)
+        let viewModel = PomodoroViewModel(
+            settings: settings,
+            notificationManager: notifications,
+            alertPresenter: alerts,
+            doNotDisturbController: doNotDisturb,
+            now: { now }
+        )
+
+        settings.applySessionPreset(AppSettingsStore.quickSessionPresets[2])
+
+        XCTAssertEqual(viewModel.statusText, "Ready to focus")
+        XCTAssertEqual(viewModel.timerText, "50:00")
+
+        viewModel.start()
+        now = now.addingTimeInterval(50 * 60)
+        viewModel.processTick()
+
+        XCTAssertEqual(alerts.presentedAlerts.first?.message, "Time for a 15-minute break.")
+
+        alerts.acknowledgeLastAlert()
+
+        XCTAssertEqual(viewModel.statusText, "Take a 15-minute break")
+        XCTAssertEqual(viewModel.timerText, "15:00")
+        XCTAssertEqual(doNotDisturb.enableCount, 0)
+    }
+
     func testStartingFocusWithDoNotDisturbEnabledRunsEnableShortcut() {
         let defaults = makeUserDefaults()
         let settings = AppSettingsStore(userDefaults: defaults)
